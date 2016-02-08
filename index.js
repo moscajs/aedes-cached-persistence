@@ -2,7 +2,7 @@
 
 var Qlobber = require('qlobber').Qlobber
 var Packet = require('aedes-packet')
-var EE = require('events')
+var EE = require('events').EventEmitter
 var inherits = require('util').inherits
 var fastparallel = require('fastparallel')
 
