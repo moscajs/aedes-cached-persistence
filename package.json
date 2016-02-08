@@ -1,0 +1,39 @@
+{
+  "name": "aedes-cached-persistence",
+  "version": "0.0.1",
+  "description": "Abstract class to write an Aedes persistence with in-process caching of subscriptions",
+  "main": "index.js",
+  "scripts": {
+    "test": "standard && tape test.js | faucet"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mcollina/aedes-cached-persistence.git"
+  },
+  "keywords": [
+    "aedes",
+    "persistence",
+    "cache",
+    "in-memory"
+  ],
+  "author": "Matteo Collina <hello@matteocollina.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mcollina/aedes-cached-persistence/issues"
+  },
+  "homepage": "https://github.com/mcollina/aedes-cached-persistence#readme",
+  "devDependencies": {
+    "concat-stream": "^1.5.1",
+    "faucet": "0.0.1",
+    "mqemitter": "^1.0.0",
+    "standard": "^5.4.1",
+    "tape": "^4.4.0",
+    "through2": "^2.0.1"
+  },
+  "dependencies": {
+    "aedes-packet": "^1.0.0",
+    "aedes-persistence": "^1.2.2",
+    "fastparallel": "^2.2.1",
+    "qlobber": "^0.5.3"
+  }
+}
