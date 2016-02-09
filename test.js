@@ -31,6 +31,7 @@ util.inherits(MyPersistence, CachedPersistence)
   'incomingStorePacket', 'incomingGetPacket',
   'incomingDelPacket', 'putWill', 'delWill',
   'createRetainedStream', 'outgoingStream',
+  'subscriptionsByClient',
   'getWill', 'streamWill', 'destroy'].forEach(function (key) {
     MyPersistence.prototype[key] = Memory.prototype[key]
   })
@@ -93,21 +94,6 @@ MyPersistence.prototype.removeSubscriptions = function (client, subs, cb) {
   }
 
   this._removedSubscriptions(client, removed, cb)
-}
-
-function toSubObj (sub) {
-  return {
-    topic: sub.topic,
-    qos: sub.qos
-  }
-}
-
-MyPersistence.prototype.subscriptionsByClient = function (client, cb) {
-  var subs = this._subscriptions[client.id] || null
-  if (subs) {
-    subs = subs.map(toSubObj)
-  }
-  cb(null, subs, client)
 }
 
 abs({
