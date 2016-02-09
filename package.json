@@ -1,6 +1,6 @@
 {
   "name": "aedes-cached-persistence",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Abstract class to write an Aedes persistence with in-process caching of subscriptions",
   "main": "index.js",
   "scripts": {
