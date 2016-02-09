@@ -22,7 +22,8 @@ function CachedPersistence (opts) {
 
   EE.call(this)
 
-  this._ready = false
+  this.ready = false
+  this.destroyed = false
   this._matcher = new Qlobber(QlobberOpts)
   this._waiting = {}
   this._parallel = fastparallel({ results: false })
@@ -30,7 +31,7 @@ function CachedPersistence (opts) {
   var that = this
 
   this.once('ready', function () {
-    that._ready = true
+    that.ready = true
   })
 
   this._onMessage = function onSubMessage (packet, cb) {
@@ -74,7 +75,7 @@ CachedPersistence.prototype._waitFor = function (client, topic, cb) {
 }
 
 CachedPersistence.prototype._addedSubscriptions = function (client, subs, cb) {
-  if (!this._ready) {
+  if (!this.ready) {
     this.once('ready', this._addedSubscriptions.bind(this, client, subs, cb))
     return
   }
@@ -82,7 +83,7 @@ CachedPersistence.prototype._addedSubscriptions = function (client, subs, cb) {
   subs = subs.filter(qosGreaterThanOne)
 
   this._parallel({
-    cb: cb,
+    cb: cb || noop,
     client: client,
     broker: this._broker,
     topic: newSubTopic
@@ -107,9 +108,11 @@ function addedSubDone () {
   this.cb(null, this.client)
 }
 
+function noop () {}
+
 CachedPersistence.prototype._removedSubscriptions = function (client, subs, cb) {
   this._parallel({
-    cb: cb,
+    cb: cb || noop,
     client: client,
     broker: this._broker,
     topic: rmSubTopic
@@ -117,7 +120,7 @@ CachedPersistence.prototype._removedSubscriptions = function (client, subs, cb) 
 }
 
 CachedPersistence.prototype.subscriptionsByTopic = function (topic, cb) {
-  if (!this._ready) {
+  if (!this.ready) {
     this.once('ready', this.subscriptionsByTopic.bind(this, topic, cb))
     return this
   }
@@ -131,6 +134,15 @@ CachedPersistence.prototype.cleanSubscriptions = function (client, cb) {
     if (err || !subs) { return cb(err, client) }
     subs = subs.map(subToTopic)
     that.removeSubscriptions(client, subs, cb)
+  })
+}
+
+CachedPersistence.prototype.destroy = function (cb) {
+  this.destroyed = true
+  this.broker.unsubscribe(subTopic, this._onMessage, function () {
+    if (cb) {
+      cb()
+    }
   })
 }
 
