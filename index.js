@@ -162,7 +162,7 @@ Object.defineProperty(CachedPersistence.prototype, 'broker', {
   },
   set: function (broker) {
     this._broker = broker
-    broker.subscribe(subTopic, this._onMessage, this._setup.bind(this))
+    this.broker.subscribe(subTopic, this._onMessage, this._setup.bind(this))
   }
 })
 

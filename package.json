@@ -25,15 +25,15 @@
   "devDependencies": {
     "concat-stream": "^1.5.1",
     "faucet": "0.0.1",
-    "mqemitter": "^1.0.0",
-    "standard": "^5.4.1",
+    "mqemitter": "^2.0.0",
+    "standard": "^7.0.0",
     "tape": "^4.4.0",
     "through2": "^2.0.1"
   },
   "dependencies": {
     "aedes-packet": "^1.0.0",
-    "aedes-persistence": "^1.2.2",
+    "aedes-persistence": "^2.0.0",
     "fastparallel": "^2.2.1",
-    "qlobber": "^0.5.3"
+    "qlobber": "^0.7.0"
   }
 }
