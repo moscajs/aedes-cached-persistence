@@ -37,7 +37,9 @@ function CachedPersistence (opts) {
   this._onMessage = function onSubMessage (packet, cb) {
     var decoded = JSON.parse(packet.payload)
     if (packet.topic === newSubTopic) {
-      that._matcher.add(decoded.topic, decoded)
+      if (!checkSubsForClient(decoded, that._matcher.match(decoded.topic))) {
+        that._matcher.add(decoded.topic, decoded)
+      }
     } else if (packet.topic === rmSubTopic) {
       that._matcher
         .match(decoded.topic)
@@ -165,6 +167,15 @@ Object.defineProperty(CachedPersistence.prototype, 'broker', {
     this.broker.subscribe(subTopic, this._onMessage, this._setup.bind(this))
   }
 })
+
+function checkSubsForClient (sub, savedSubs) {
+  for (var i = 0; i < savedSubs.length; i++) {
+    if (sub.topic === savedSubs[i].topic && sub.clientId === savedSubs[i].clientId) {
+      return true
+    }
+  }
+  return false
+}
 
 module.exports = CachedPersistence
 module.exports.Packet = Packet
