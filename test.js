@@ -32,7 +32,7 @@ util.inherits(MyPersistence, CachedPersistence)
   'incomingDelPacket', 'putWill', 'delWill',
   'createRetainedStream', 'outgoingStream',
   'subscriptionsByClient',
-  'getWill', 'streamWill', 'destroy'].forEach(function (key) {
+  'getWill', 'streamWill', 'getClientList', 'destroy'].forEach(function (key) {
     MyPersistence.prototype[key] = Memory.prototype[key]
   })
 
