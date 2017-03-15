@@ -55,10 +55,16 @@ MyPersistence.prototype.addSubscriptions = function (client, subs, cb) {
   })
 
   subsObjs.forEach(function eachSub (sub) {
-    stored.push(sub)
-
     if (sub.qos > 0) {
-      that._subscriptionsCount++
+      if (!checkSubsForClient(sub, that._matcher.match(sub.topic))) {
+        that._subscriptionsCount++
+        that._matcher.add(sub.topic, sub)
+        stored.push(sub)
+      }
+    } else {
+      if (!checkSubsForClient(sub, that._subscriptions[client.id])) {
+        stored.push(sub)
+      }
     }
   })
 
@@ -94,6 +100,15 @@ MyPersistence.prototype.removeSubscriptions = function (client, subs, cb) {
   }
 
   this._removedSubscriptions(client, removed, cb)
+}
+
+function checkSubsForClient (sub, savedSubs) {
+  for (var i = 0; i < savedSubs.length; i++) {
+    if (sub.topic === savedSubs[i].topic && sub.clientId === savedSubs[i].clientId) {
+      return true
+    }
+  }
+  return false
 }
 
 abs({
