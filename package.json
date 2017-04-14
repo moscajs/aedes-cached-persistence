@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "aedes-packet": "^1.0.0",
-    "aedes-persistence": "^2.4.0",
+    "aedes-persistence": "^3.0.0",
     "fastparallel": "^2.2.1",
     "qlobber": "^0.7.0"
   }
