@@ -57,7 +57,7 @@ function CachedPersistence (opts) {
 }
 
 function matching (sub) {
-  return sub.topic === this.topic
+  return sub.topic === this.topic && sub.clientId === this.clientId
 }
 
 function rmSub (sub) {
