@@ -141,10 +141,11 @@ CachedPersistence.prototype.cleanSubscriptions = function (client, cb) {
 }
 
 CachedPersistence.prototype.createRetainedStreamCombi = function (patterns) {
+  var that = this
   var streams = patterns.map(function (p) {
-    return this.createRetainedStream(p)
+    return that.createRetainedStream(p)
   })
-  return MultiStream(streams)
+  return MultiStream.obj(streams)
 }
 
 CachedPersistence.prototype.destroy = function (cb) {
