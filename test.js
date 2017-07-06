@@ -30,8 +30,8 @@ util.inherits(MyPersistence, CachedPersistence)
   'outgoingUpdate', 'outgoingClearMessageId',
   'incomingStorePacket', 'incomingGetPacket',
   'incomingDelPacket', 'putWill', 'delWill',
-  'createRetainedStream', 'outgoingStream',
-  'subscriptionsByClient',
+  'createRetainedStream', 'createRetainedStreamCombi',
+  'outgoingStream', 'subscriptionsByClient',
   'getWill', 'streamWill', 'getClientList', 'destroy'].forEach(function (key) {
     MyPersistence.prototype[key] = Memory.prototype[key]
   })
