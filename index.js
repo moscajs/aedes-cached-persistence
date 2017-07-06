@@ -5,6 +5,7 @@ var Packet = require('aedes-packet')
 var EE = require('events').EventEmitter
 var inherits = require('util').inherits
 var fastparallel = require('fastparallel')
+var MultiStream = require('multistream')
 
 var QlobberOpts = {
   wildcard_one: '+',
@@ -57,7 +58,7 @@ function CachedPersistence (opts) {
 }
 
 function matching (sub) {
-  return sub.topic === this.topic
+  return sub.topic === this.topic && sub.clientId === this.clientId
 }
 
 function rmSub (sub) {
@@ -137,6 +138,14 @@ CachedPersistence.prototype.cleanSubscriptions = function (client, cb) {
     subs = subs.map(subToTopic)
     that.removeSubscriptions(client, subs, cb)
   })
+}
+
+CachedPersistence.prototype.createRetainedStreamCombi = function (patterns) {
+  var that = this
+  var streams = patterns.map(function (p) {
+    return that.createRetainedStream(p)
+  })
+  return MultiStream.obj(streams)
 }
 
 CachedPersistence.prototype.destroy = function (cb) {
