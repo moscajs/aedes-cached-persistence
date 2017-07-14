@@ -88,7 +88,9 @@ CachedPersistence.prototype._addedSubscriptions = function (client, subs, cb) {
     topic: newSubTopic,
     brokerPublish: brokerPublish
   }
-  ctx.brokerPublish(subs, addedSubDone.bind(ctx))
+  ctx.brokerPublish(subs, function () {
+    cb(null, client)
+  })
 }
 
 function qosGreaterThanOne (sub) {
@@ -104,10 +106,6 @@ function brokerPublish (subs, cb) {
   this.broker.publish(packet, cb)
 }
 
-function addedSubDone () {
-  this.cb(null, this.client)
-}
-
 function noop () {}
 
 CachedPersistence.prototype._removedSubscriptions = function (client, subs, cb) {
@@ -118,7 +116,9 @@ CachedPersistence.prototype._removedSubscriptions = function (client, subs, cb) 
     topic: rmSubTopic,
     brokerPublish: brokerPublish
   }
-  ctx.brokerPublish(subs, addedSubDone.bind(ctx))
+  ctx.brokerPublish(subs, function () {
+    cb(null, client)
+  })
 }
 
 CachedPersistence.prototype.subscriptionsByTopic = function (topic, cb) {
