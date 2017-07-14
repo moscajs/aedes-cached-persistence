@@ -37,19 +37,23 @@ function CachedPersistence (opts) {
 
   this._onMessage = function onSubMessage (packet, cb) {
     var decoded = JSON.parse(packet.payload)
-    if (packet.topic === newSubTopic) {
-      if (!checkSubsForClient(decoded, that._matcher.match(decoded.topic))) {
-        that._matcher.add(decoded.topic, decoded)
+    var clientId
+    for (var i = 0; i < decoded.subs.length; i++) {
+      var sub = decoded.subs[i]
+      clientId = sub.clientId
+      if (packet.topic === newSubTopic) {
+        if (!checkSubsForClient(sub, that._matcher.match(sub.topic))) {
+          that._matcher.add(sub.topic, sub)
+        }
+      } else if (packet.topic === rmSubTopic) {
+        that._matcher
+          .match(sub.topic)
+          .filter(matching, sub)
+          .forEach(rmSub, that._matcher)
       }
-    } else if (packet.topic === rmSubTopic) {
-      that._matcher
-        .match(decoded.topic)
-        .filter(matching, decoded)
-        .forEach(rmSub, that._matcher)
     }
-    var key = decoded.clientId + '-' + decoded.topic
-    var waiting = that._waiting[key]
-    delete that._waiting[key]
+    var waiting = that._waiting[clientId]
+    delete that._waiting[clientId]
     if (waiting) {
       process.nextTick(waiting)
     }
@@ -65,16 +69,10 @@ function rmSub (sub) {
   this.remove(sub.topic, sub)
 }
 
-function Sub (clientId, topic, qos) {
-  this.clientId = clientId
-  this.topic = topic
-  this.qos = qos
-}
-
 inherits(CachedPersistence, EE)
 
-CachedPersistence.prototype._waitFor = function (client, topic, cb) {
-  this._waiting[client.id + '-' + topic] = cb
+CachedPersistence.prototype._waitFor = function (client, cb) {
+  this._waiting[client.id] = cb
 }
 
 CachedPersistence.prototype._addedSubscriptions = function (client, subs, cb) {
@@ -85,21 +83,22 @@ CachedPersistence.prototype._addedSubscriptions = function (client, subs, cb) {
 
   subs = subs.filter(qosGreaterThanOne)
 
-  this._parallel({
+  var ctx = {
     cb: cb || noop,
     client: client,
     broker: this._broker,
-    topic: newSubTopic
-  }, brokerPublish, subs, addedSubDone)
+    topic: newSubTopic,
+    brokerPublish: brokerPublish
+  }
+  ctx.brokerPublish(subs, addedSubDone.bind(ctx))
 }
 
 function qosGreaterThanOne (sub) {
   return sub.qos > 0
 }
 
-function brokerPublish (sub, cb) {
-  var client = this.client
-  var encoded = JSON.stringify(new Sub(client.id, sub.topic, sub.qos))
+function brokerPublish (subs, cb) {
+  var encoded = JSON.stringify({subs: subs})
   var packet = new Packet({
     topic: this.topic,
     payload: encoded
@@ -114,12 +113,14 @@ function addedSubDone () {
 function noop () {}
 
 CachedPersistence.prototype._removedSubscriptions = function (client, subs, cb) {
-  this._parallel({
+  var ctx = {
     cb: cb || noop,
     client: client,
     broker: this._broker,
-    topic: rmSubTopic
-  }, brokerPublish, subs, addedSubDone)
+    topic: rmSubTopic,
+    brokerPublish: brokerPublish
+  }
+  ctx.brokerPublish(subs, addedSubDone.bind(ctx))
 }
 
 CachedPersistence.prototype.subscriptionsByTopic = function (topic, cb) {
