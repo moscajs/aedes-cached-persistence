@@ -4,7 +4,6 @@ var Qlobber = require('qlobber').Qlobber
 var Packet = require('aedes-packet')
 var EE = require('events').EventEmitter
 var inherits = require('util').inherits
-var fastparallel = require('fastparallel')
 var MultiStream = require('multistream')
 
 var QlobberOpts = {
@@ -27,7 +26,6 @@ function CachedPersistence (opts) {
   this.destroyed = false
   this._matcher = new Qlobber(QlobberOpts)
   this._waiting = {}
-  this._parallel = fastparallel({ results: false })
 
   var that = this
 
