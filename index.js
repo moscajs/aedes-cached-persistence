@@ -35,10 +35,10 @@ function CachedPersistence (opts) {
 
   this._onMessage = function onSubMessage (packet, cb) {
     var decoded = JSON.parse(packet.payload)
-    var clientId
+    var clientId = decoded.clientId
     for (var i = 0; i < decoded.subs.length; i++) {
       var sub = decoded.subs[i]
-      clientId = sub.clientId
+      sub.clientId = clientId
       if (packet.topic === newSubTopic) {
         if (!checkSubsForClient(sub, that._matcher.match(sub.topic))) {
           that._matcher.add(sub.topic, sub)
@@ -116,7 +116,7 @@ function qosGreaterThanOne (sub) {
 }
 
 function brokerPublish (subs, cb) {
-  var encoded = JSON.stringify({subs: subs})
+  var encoded = JSON.stringify({clientId: this.client.id, subs: subs})
   var packet = new Packet({
     topic: this.topic,
     payload: encoded
