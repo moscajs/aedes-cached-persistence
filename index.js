@@ -4,7 +4,6 @@ var Qlobber = require('qlobber').Qlobber
 var Packet = require('aedes-packet')
 var EE = require('events').EventEmitter
 var inherits = require('util').inherits
-var fastparallel = require('fastparallel')
 var MultiStream = require('multistream')
 
 var QlobberOpts = {
@@ -27,7 +26,6 @@ function CachedPersistence (opts) {
   this.destroyed = false
   this._matcher = new Qlobber(QlobberOpts)
   this._waiting = {}
-  this._parallel = fastparallel({ results: false })
 
   var that = this
 
@@ -37,19 +35,24 @@ function CachedPersistence (opts) {
 
   this._onMessage = function onSubMessage (packet, cb) {
     var decoded = JSON.parse(packet.payload)
-    if (packet.topic === newSubTopic) {
-      if (!checkSubsForClient(decoded, that._matcher.match(decoded.topic))) {
-        that._matcher.add(decoded.topic, decoded)
+    var clientId
+    for (var i = 0; i < decoded.subs.length; i++) {
+      var sub = decoded.subs[i]
+      clientId = sub.clientId
+      if (packet.topic === newSubTopic) {
+        if (!checkSubsForClient(sub, that._matcher.match(sub.topic))) {
+          that._matcher.add(sub.topic, sub)
+        }
+      } else if (packet.topic === rmSubTopic) {
+        that._matcher
+          .match(sub.topic)
+          .filter(matching, sub)
+          .forEach(rmSub, that._matcher)
       }
-    } else if (packet.topic === rmSubTopic) {
-      that._matcher
-        .match(decoded.topic)
-        .filter(matching, decoded)
-        .forEach(rmSub, that._matcher)
     }
-    var key = decoded.clientId + '-' + decoded.topic
-    var waiting = that._waiting[key]
-    delete that._waiting[key]
+    var action = packet.topic === newSubTopic ? 'sub' : 'unsub'
+    var waiting = that._waiting[clientId + '-' + action]
+    delete that._waiting[clientId + '-' + action]
     if (waiting) {
       process.nextTick(waiting)
     }
@@ -65,16 +68,10 @@ function rmSub (sub) {
   this.remove(sub.topic, sub)
 }
 
-function Sub (clientId, topic, qos) {
-  this.clientId = clientId
-  this.topic = topic
-  this.qos = qos
-}
-
 inherits(CachedPersistence, EE)
 
-CachedPersistence.prototype._waitFor = function (client, topic, cb) {
-  this._waiting[client.id + '-' + topic] = cb
+CachedPersistence.prototype._waitFor = function (client, action, cb) {
+  this._waiting[client.id + '-' + action] = cb
 }
 
 CachedPersistence.prototype._addedSubscriptions = function (client, subs, cb) {
@@ -83,23 +80,43 @@ CachedPersistence.prototype._addedSubscriptions = function (client, subs, cb) {
     return
   }
 
-  subs = subs.filter(qosGreaterThanOne)
+  var errored = false
 
-  this._parallel({
+  this._waitFor(client, 'sub', function (err) {
+    if (!errored && err) {
+      return cb(err)
+    }
+    if (!errored) {
+      cb(null, client)
+    }
+  })
+
+  subs = subs.filter(qosGreaterThanOne)
+  if (subs.length === 0) {
+    return cb(null, client)
+  }
+
+  var ctx = {
     cb: cb || noop,
     client: client,
     broker: this._broker,
-    topic: newSubTopic
-  }, brokerPublish, subs, addedSubDone)
+    topic: newSubTopic,
+    brokerPublish: brokerPublish
+  }
+  ctx.brokerPublish(subs, function (err) {
+    if (err) {
+      errored = true
+      cb(err)
+    }
+  })
 }
 
 function qosGreaterThanOne (sub) {
   return sub.qos > 0
 }
 
-function brokerPublish (sub, cb) {
-  var client = this.client
-  var encoded = JSON.stringify(new Sub(client.id, sub.topic, sub.qos))
+function brokerPublish (subs, cb) {
+  var encoded = JSON.stringify({subs: subs})
   var packet = new Packet({
     topic: this.topic,
     payload: encoded
@@ -107,19 +124,37 @@ function brokerPublish (sub, cb) {
   this.broker.publish(packet, cb)
 }
 
-function addedSubDone () {
-  this.cb(null, this.client)
-}
-
 function noop () {}
 
 CachedPersistence.prototype._removedSubscriptions = function (client, subs, cb) {
-  this._parallel({
+  if (!this.ready) {
+    this.once('ready', this._removedSubscriptions.bind(this, client, subs, cb))
+    return
+  }
+  var errored = false
+
+  this._waitFor(client, 'unsub', function (err) {
+    if (!errored && err) {
+      return cb(err)
+    }
+    if (!errored) {
+      cb(null, client)
+    }
+  })
+
+  var ctx = {
     cb: cb || noop,
     client: client,
     broker: this._broker,
-    topic: rmSubTopic
-  }, brokerPublish, subs, addedSubDone)
+    topic: rmSubTopic,
+    brokerPublish: brokerPublish
+  }
+  ctx.brokerPublish(subs, function (err) {
+    if (err) {
+      errored = true
+      cb(err)
+    }
+  })
 }
 
 CachedPersistence.prototype.subscriptionsByTopic = function (topic, cb) {
