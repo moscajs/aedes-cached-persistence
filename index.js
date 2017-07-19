@@ -175,6 +175,26 @@ CachedPersistence.prototype.cleanSubscriptions = function (client, cb) {
   })
 }
 
+CachedPersistence.prototype.outgoingEnqueueCombi = function (subs, packet, cb) {
+  var count = 0
+  var errord = false
+
+  for (var i = 0; i < subs.length; i++) {
+    this.outgoingEnqueue(subs[i], packet, finish)
+  }
+
+  function finish (err) {
+    count++
+    if (err) {
+      errord = err
+      return cb(err)
+    }
+    if (count === subs.length && !errord) {
+      cb()
+    }
+  }
+}
+
 CachedPersistence.prototype.createRetainedStreamCombi = function (patterns) {
   var that = this
   var streams = patterns.map(function (p) {
