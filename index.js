@@ -176,23 +176,14 @@ CachedPersistence.prototype.cleanSubscriptions = function (client, cb) {
 }
 
 CachedPersistence.prototype.outgoingEnqueueCombi = function (subs, packet, cb) {
-  var count = 0
-  var errord = false
+  this.broker._parallel({
+    persistence: this,
+    packet: packet
+  }, outgoingEnqueue, subs, cb)
+}
 
-  for (var i = 0; i < subs.length; i++) {
-    this.outgoingEnqueue(subs[i], packet, finish)
-  }
-
-  function finish (err) {
-    count++
-    if (err) {
-      errord = err
-      return cb(err)
-    }
-    if (count === subs.length && !errord) {
-      cb()
-    }
-  }
+function outgoingEnqueue (sub, cb) {
+  this.persistence.outgoingEnqueue(sub, this.packet, cb)
 }
 
 CachedPersistence.prototype.createRetainedStreamCombi = function (patterns) {
