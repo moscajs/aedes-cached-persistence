@@ -175,6 +175,17 @@ CachedPersistence.prototype.cleanSubscriptions = function (client, cb) {
   })
 }
 
+CachedPersistence.prototype.outgoingEnqueueCombi = function (subs, packet, cb) {
+  this.broker._parallel({
+    persistence: this,
+    packet: packet
+  }, outgoingEnqueue, subs, cb)
+}
+
+function outgoingEnqueue (sub, cb) {
+  this.persistence.outgoingEnqueue(sub, this.packet, cb)
+}
+
 CachedPersistence.prototype.createRetainedStreamCombi = function (patterns) {
   var that = this
   var streams = patterns.map(function (p) {
