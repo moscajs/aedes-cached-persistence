@@ -5,6 +5,7 @@ var Packet = require('aedes-packet')
 var EE = require('events').EventEmitter
 var inherits = require('util').inherits
 var MultiStream = require('multistream')
+var parallel = require('fastparallel')
 
 var QlobberOpts = {
   wildcard_one: '+',
@@ -24,6 +25,7 @@ function CachedPersistence (opts) {
 
   this.ready = false
   this.destroyed = false
+  this._parallel = parallel()
   this._matcher = new Qlobber(QlobberOpts)
   this._waiting = {}
 
@@ -176,7 +178,7 @@ CachedPersistence.prototype.cleanSubscriptions = function (client, cb) {
 }
 
 CachedPersistence.prototype.outgoingEnqueueCombi = function (subs, packet, cb) {
-  this.broker._parallel({
+  this._parallel({
     persistence: this,
     packet: packet
   }, outgoingEnqueue, subs, cb)
