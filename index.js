@@ -1,6 +1,8 @@
 'use strict'
 
-var Qlobber = require('qlobber').Qlobber
+var util = require('util')
+var qlobber = require('qlobber')
+var Qlobber = qlobber.Qlobber
 var Packet = require('aedes-packet')
 var EE = require('events').EventEmitter
 var inherits = require('util').inherits
@@ -16,6 +18,54 @@ var newSubTopic = '$SYS/sub/add'
 var rmSubTopic = '$SYS/sub/rm'
 var subTopic = '$SYS/sub/+'
 
+function QlobberSub (options) {
+  Qlobber.call(this, options)
+}
+
+util.inherits(QlobberSub, Qlobber)
+
+QlobberSub.prototype._initial_value = function (val) {
+  var topicMap = new Map().set(val.sub.topic, val.sub.qos)
+  return new Map().set(val.clientId, topicMap)
+}
+
+QlobberSub.prototype._add_value = function (clientMap, val) {
+  var topicMap = clientMap.get(val.clientId)
+  if (!topicMap) {
+    topicMap = new Map()
+    clientMap.set(val.clientId, topicMap)
+  }
+  topicMap.set(val.sub.topic, val.sub.qos)
+}
+
+QlobberSub.prototype._add_values = function (dest, clientMap) {
+  for (var [clientId, topicMap] of clientMap) {
+    for (var [topic, qos] of topicMap) {
+      dest.push({ clientId: clientId, topic: topic, qos: qos })
+    }
+  }
+}
+
+QlobberSub.prototype._remove_value = function (clientMap, val) {
+  var topicMap = clientMap.get(val.clientId)
+  if (topicMap) {
+    topicMap.delete(val.topic)
+    if (topicMap.size === 0) {
+      clientMap.delete(val.clientId)
+    }
+  }
+  return clientMap.size === 0
+}
+
+QlobberSub.prototype.test_values = function (clientMap, val) {
+  var topicMap = clientMap.get(val.clientId)
+  return topicMap && topicMap.has(val.sub.topic)
+}
+
+QlobberSub.prototype.match = function (topic) {
+  return this._match([], 0, topic.split(this._separator), this._trie)
+}
+
 function CachedPersistence (opts) {
   if (!(this instanceof CachedPersistence)) {
     return new CachedPersistence(opts)
@@ -26,7 +76,7 @@ function CachedPersistence (opts) {
   this.ready = false
   this.destroyed = false
   this._parallel = parallel()
-  this._matcher = new Qlobber(QlobberOpts)
+  this._matcher = new QlobberSub(QlobberOpts)
   this._waiting = {}
 
   var that = this
@@ -42,14 +92,9 @@ function CachedPersistence (opts) {
       var sub = decoded.subs[i]
       sub.clientId = clientId
       if (packet.topic === newSubTopic) {
-        if (!checkSubsForClient(sub, that._matcher.match(sub.topic))) {
-          that._matcher.add(sub.topic, sub)
-        }
+        that._matcher.add(sub.topic, { clientId: clientId, sub: sub })
       } else if (packet.topic === rmSubTopic) {
-        that._matcher
-          .match(sub.topic)
-          .filter(matching, sub)
-          .forEach(rmSub, that._matcher)
+        that._matcher.remove(sub.topic, { clientId: clientId, topic: sub.topic })
       }
     }
     var action = packet.topic === newSubTopic ? 'sub' : 'unsub'
@@ -60,14 +105,6 @@ function CachedPersistence (opts) {
     }
     cb()
   }
-}
-
-function matching (sub) {
-  return sub.topic === this.topic && sub.clientId === this.clientId
-}
-
-function rmSub (sub) {
-  this.remove(sub.topic, sub)
 }
 
 inherits(CachedPersistence, EE)
@@ -224,15 +261,6 @@ Object.defineProperty(CachedPersistence.prototype, 'broker', {
     this.broker.subscribe(subTopic, this._onMessage, this._setup.bind(this))
   }
 })
-
-function checkSubsForClient (sub, savedSubs) {
-  for (var i = 0; i < savedSubs.length; i++) {
-    if (sub.topic === savedSubs[i].topic && sub.clientId === savedSubs[i].clientId) {
-      return true
-    }
-  }
-  return false
-}
 
 module.exports = CachedPersistence
 module.exports.Packet = Packet
