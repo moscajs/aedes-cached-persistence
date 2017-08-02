@@ -56,7 +56,6 @@ MyPersistence.prototype.addSubscriptions = function (client, subs, cb) {
   for (var sub of subsObjs) {
     if (sub.qos > 0) {
       this._subscriptionsCount++
-      this._matcher.add(sub.topic, { clientId: client.id, sub: sub })
       stored.set(sub.topic, sub.qos)
     } else {
       if (!stored.has(sub.topic)) {
@@ -78,7 +77,6 @@ MyPersistence.prototype.removeSubscriptions = function (client, subs, cb) {
       if (qos !== undefined) {
         if (qos > 0) {
           this._subscriptionsCount--
-          this._matcher.remove(topic, { clientId: client.id, topic: topic })
           removed.push({
             clientId: client.id,
             topic: topic,
