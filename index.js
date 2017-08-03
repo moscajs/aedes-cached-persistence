@@ -1,8 +1,6 @@
 'use strict'
 
-var util = require('util')
-var qlobber = require('qlobber')
-var Qlobber = qlobber.Qlobber
+var QlobberSub = require('aedes-persistence/qlobber-sub')
 var Packet = require('aedes-packet')
 var EE = require('events').EventEmitter
 var inherits = require('util').inherits
@@ -17,54 +15,6 @@ var QlobberOpts = {
 var newSubTopic = '$SYS/sub/add'
 var rmSubTopic = '$SYS/sub/rm'
 var subTopic = '$SYS/sub/+'
-
-function QlobberSub (options) {
-  Qlobber.call(this, options)
-}
-
-util.inherits(QlobberSub, Qlobber)
-
-QlobberSub.prototype._initial_value = function (val) {
-  var topicMap = new Map().set(val.sub.topic, val.sub.qos)
-  return new Map().set(val.clientId, topicMap)
-}
-
-QlobberSub.prototype._add_value = function (clientMap, val) {
-  var topicMap = clientMap.get(val.clientId)
-  if (!topicMap) {
-    topicMap = new Map()
-    clientMap.set(val.clientId, topicMap)
-  }
-  topicMap.set(val.sub.topic, val.sub.qos)
-}
-
-QlobberSub.prototype._add_values = function (dest, clientMap) {
-  for (var [clientId, topicMap] of clientMap) {
-    for (var [topic, qos] of topicMap) {
-      dest.push({ clientId: clientId, topic: topic, qos: qos })
-    }
-  }
-}
-
-QlobberSub.prototype._remove_value = function (clientMap, val) {
-  var topicMap = clientMap.get(val.clientId)
-  if (topicMap) {
-    topicMap.delete(val.topic)
-    if (topicMap.size === 0) {
-      clientMap.delete(val.clientId)
-    }
-  }
-  return clientMap.size === 0
-}
-
-QlobberSub.prototype.test_values = function (clientMap, val) {
-  var topicMap = clientMap.get(val.clientId)
-  return topicMap && topicMap.has(val.sub.topic)
-}
-
-QlobberSub.prototype.match = function (topic) {
-  return this._match([], 0, topic.split(this._separator), this._trie)
-}
 
 function CachedPersistence (opts) {
   if (!(this instanceof CachedPersistence)) {
@@ -92,9 +42,9 @@ function CachedPersistence (opts) {
       var sub = decoded.subs[i]
       sub.clientId = clientId
       if (packet.topic === newSubTopic) {
-        that._matcher.add(sub.topic, { clientId: clientId, sub: sub })
+        that._matcher.add(sub.topic, sub)
       } else if (packet.topic === rmSubTopic) {
-        that._matcher.remove(sub.topic, { clientId: clientId, topic: sub.topic })
+        that._matcher.remove(sub.topic, sub)
       }
     }
     var action = packet.topic === newSubTopic ? 'sub' : 'unsub'
