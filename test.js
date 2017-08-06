@@ -37,6 +37,7 @@ util.inherits(MyPersistence, CachedPersistence)
   })
 
 MyPersistence.prototype.addSubscriptions = function (client, subs, cb) {
+  var that = this
   var stored = this._subscriptions.get(client.id)
 
   if (!stored) {
@@ -46,23 +47,22 @@ MyPersistence.prototype.addSubscriptions = function (client, subs, cb) {
   }
 
   var subsObjs = subs.map(function mapSub (sub) {
+    var qos = stored.get(sub.topic)
+    var hasQoSGreaterThanZero = (qos !== undefined) && (qos > 0)
+    if (sub.qos > 0) {
+      if (!hasQoSGreaterThanZero) {
+        that._subscriptionsCount++
+      }
+    } else if (hasQoSGreaterThanZero) {
+      that._subscriptionsCount--
+    }
+    stored.set(sub.topic, sub.qos)
     return {
       clientId: client.id,
       topic: sub.topic,
       qos: sub.qos
     }
   })
-
-  for (var sub of subsObjs) {
-    if (sub.qos > 0) {
-      this._subscriptionsCount++
-      stored.set(sub.topic, sub.qos)
-    } else {
-      if (!stored.has(sub.topic)) {
-        stored.set(sub.topic, sub.qos)
-      }
-    }
-  }
 
   this._addedSubscriptions(client, subsObjs, cb)
 }

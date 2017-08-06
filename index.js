@@ -42,7 +42,11 @@ function CachedPersistence (opts) {
       var sub = decoded.subs[i]
       sub.clientId = clientId
       if (packet.topic === newSubTopic) {
-        that._matcher.add(sub.topic, sub)
+        if (sub.qos > 0) {
+          that._matcher.add(sub.topic, sub)
+        } else {
+          that._matcher.remove(sub.topic, sub)
+        }
       } else if (packet.topic === rmSubTopic) {
         that._matcher.remove(sub.topic, sub)
       }
@@ -80,7 +84,6 @@ CachedPersistence.prototype._addedSubscriptions = function (client, subs, cb) {
     }
   })
 
-  subs = subs.filter(qosGreaterThanOne)
   if (subs.length === 0) {
     return cb(null, client)
   }
@@ -98,10 +101,6 @@ CachedPersistence.prototype._addedSubscriptions = function (client, subs, cb) {
       cb(err)
     }
   })
-}
-
-function qosGreaterThanOne (sub) {
-  return sub.qos > 0
 }
 
 function brokerPublish (subs, cb) {
