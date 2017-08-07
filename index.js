@@ -1,6 +1,6 @@
 'use strict'
 
-var QlobberSub = require('aedes-persistence/qlobber-sub')
+var QlobberSub = require('qlobber/aedes/qlobber-sub')
 var Packet = require('aedes-packet')
 var EE = require('events').EventEmitter
 var inherits = require('util').inherits

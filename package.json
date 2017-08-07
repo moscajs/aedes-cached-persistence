@@ -35,6 +35,6 @@
     "aedes-persistence": "git+https://github.com/davedoesdev/aedes-persistence.git",
     "fastparallel": "^2.3.0",
     "multistream": "^2.1.0",
-    "qlobber": "^1.2.0"
+    "qlobber": "^1.3.0"
   }
 }
