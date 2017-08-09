@@ -72,7 +72,8 @@ MyPersistence.prototype.removeSubscriptions = function (client, subs, cb) {
   var removed = []
 
   if (stored) {
-    for (var topic of subs) {
+    for (var i = 0; i < subs.length; i += 1) {
+      var topic = subs[i]
       var qos = stored.get(topic)
       if (qos !== undefined) {
         if (qos > 0) {
