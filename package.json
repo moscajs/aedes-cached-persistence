@@ -32,9 +32,9 @@
   },
   "dependencies": {
     "aedes-packet": "^1.0.0",
-    "aedes-persistence": "git+https://github.com/davedoesdev/aedes-persistence.git",
+    "aedes-persistence": "git+https://github.com/mcollina/aedes-persistence.git#qlobber-sub-count",
     "fastparallel": "^2.3.0",
     "multistream": "^2.1.0",
-    "qlobber": "^1.5.0"
+    "qlobber": "^1.8.0"
   }
 }

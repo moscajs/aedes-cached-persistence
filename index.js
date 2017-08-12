@@ -26,7 +26,7 @@ function CachedPersistence (opts) {
   this.ready = false
   this.destroyed = false
   this._parallel = parallel()
-  this._matcher = new QlobberSub(QlobberOpts)
+  this._trie = new QlobberSub(QlobberOpts)
   this._waiting = {}
 
   var that = this
@@ -43,12 +43,12 @@ function CachedPersistence (opts) {
       sub.clientId = clientId
       if (packet.topic === newSubTopic) {
         if (sub.qos > 0) {
-          that._matcher.add(sub.topic, sub)
+          that._trie.add(sub.topic, sub)
         } else {
-          that._matcher.remove(sub.topic, sub)
+          that._trie.remove(sub.topic, sub)
         }
       } else if (packet.topic === rmSubTopic) {
-        that._matcher.remove(sub.topic, sub)
+        that._trie.remove(sub.topic, sub)
       }
     }
     var action = packet.topic === newSubTopic ? 'sub' : 'unsub'
@@ -151,7 +151,7 @@ CachedPersistence.prototype.subscriptionsByTopic = function (topic, cb) {
     return this
   }
 
-  cb(null, this._matcher.match(topic))
+  cb(null, this._trie.match(topic))
 }
 
 CachedPersistence.prototype.cleanSubscriptions = function (client, cb) {

@@ -14,7 +14,6 @@ function MyPersistence () {
   // copied from Memory
   this._retained = []
   this._subscriptions = new Map()
-  this._subscriptionsCount = 0
   this._clientsCount = 0
   this._outgoing = {}
   this._incoming = {}
@@ -37,7 +36,6 @@ util.inherits(MyPersistence, CachedPersistence)
   })
 
 MyPersistence.prototype.addSubscriptions = function (client, subs, cb) {
-  var that = this
   var stored = this._subscriptions.get(client.id)
 
   if (!stored) {
@@ -47,15 +45,6 @@ MyPersistence.prototype.addSubscriptions = function (client, subs, cb) {
   }
 
   var subsObjs = subs.map(function mapSub (sub) {
-    var qos = stored.get(sub.topic)
-    var hasQoSGreaterThanZero = (qos !== undefined) && (qos > 0)
-    if (sub.qos > 0) {
-      if (!hasQoSGreaterThanZero) {
-        that._subscriptionsCount++
-      }
-    } else if (hasQoSGreaterThanZero) {
-      that._subscriptionsCount--
-    }
     stored.set(sub.topic, sub.qos)
     return {
       clientId: client.id,
@@ -77,7 +66,6 @@ MyPersistence.prototype.removeSubscriptions = function (client, subs, cb) {
       var qos = stored.get(topic)
       if (qos !== undefined) {
         if (qos > 0) {
-          this._subscriptionsCount--
           removed.push({
             clientId: client.id,
             topic: topic,
