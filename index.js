@@ -1,6 +1,6 @@
 'use strict'
 
-var Qlobber = require('qlobber').Qlobber
+var QlobberSub = require('qlobber/aedes/qlobber-sub')
 var Packet = require('aedes-packet')
 var EE = require('events').EventEmitter
 var inherits = require('util').inherits
@@ -26,7 +26,7 @@ function CachedPersistence (opts) {
   this.ready = false
   this.destroyed = false
   this._parallel = parallel()
-  this._matcher = new Qlobber(QlobberOpts)
+  this._trie = new QlobberSub(QlobberOpts)
   this._waiting = {}
 
   var that = this
@@ -42,14 +42,13 @@ function CachedPersistence (opts) {
       var sub = decoded.subs[i]
       sub.clientId = clientId
       if (packet.topic === newSubTopic) {
-        if (!checkSubsForClient(sub, that._matcher.match(sub.topic))) {
-          that._matcher.add(sub.topic, sub)
+        if (sub.qos > 0) {
+          that._trie.add(sub.topic, sub)
+        } else {
+          that._trie.remove(sub.topic, sub)
         }
       } else if (packet.topic === rmSubTopic) {
-        that._matcher
-          .match(sub.topic)
-          .filter(matching, sub)
-          .forEach(rmSub, that._matcher)
+        that._trie.remove(sub.topic, sub)
       }
     }
     var action = packet.topic === newSubTopic ? 'sub' : 'unsub'
@@ -60,14 +59,6 @@ function CachedPersistence (opts) {
     }
     cb()
   }
-}
-
-function matching (sub) {
-  return sub.topic === this.topic && sub.clientId === this.clientId
-}
-
-function rmSub (sub) {
-  this.remove(sub.topic, sub)
 }
 
 inherits(CachedPersistence, EE)
@@ -93,7 +84,6 @@ CachedPersistence.prototype._addedSubscriptions = function (client, subs, cb) {
     }
   })
 
-  subs = subs.filter(qosGreaterThanOne)
   if (subs.length === 0) {
     return cb(null, client)
   }
@@ -111,10 +101,6 @@ CachedPersistence.prototype._addedSubscriptions = function (client, subs, cb) {
       cb(err)
     }
   })
-}
-
-function qosGreaterThanOne (sub) {
-  return sub.qos > 0
 }
 
 function brokerPublish (subs, cb) {
@@ -165,7 +151,7 @@ CachedPersistence.prototype.subscriptionsByTopic = function (topic, cb) {
     return this
   }
 
-  cb(null, this._matcher.match(topic))
+  cb(null, this._trie.match(topic))
 }
 
 CachedPersistence.prototype.cleanSubscriptions = function (client, cb) {
@@ -224,15 +210,6 @@ Object.defineProperty(CachedPersistence.prototype, 'broker', {
     this.broker.subscribe(subTopic, this._onMessage, this._setup.bind(this))
   }
 })
-
-function checkSubsForClient (sub, savedSubs) {
-  for (var i = 0; i < savedSubs.length; i++) {
-    if (sub.topic === savedSubs[i].topic && sub.clientId === savedSubs[i].clientId) {
-      return true
-    }
-  }
-  return false
-}
 
 module.exports = CachedPersistence
 module.exports.Packet = Packet
