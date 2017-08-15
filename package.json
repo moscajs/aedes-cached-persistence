@@ -26,13 +26,13 @@
     "concat-stream": "^1.5.1",
     "faucet": "0.0.1",
     "mqemitter": "^2.0.0",
-    "standard": "^10.0.0",
-    "tape": "^4.7.0",
+    "standard": "^10.0.3",
+    "tape": "^4.8.0",
     "through2": "^2.0.1"
   },
   "dependencies": {
     "aedes-packet": "^1.0.0",
-    "aedes-persistence": "git+https://github.com/mcollina/aedes-persistence.git#qlobber-sub-count",
+    "aedes-persistence": "^5.1.1",
     "fastparallel": "^2.3.0",
     "multistream": "^2.1.0",
     "qlobber": "^1.8.0"
