@@ -32,9 +32,9 @@
   },
   "dependencies": {
     "aedes-packet": "^1.0.0",
-    "aedes-persistence": "^5.1.1",
+    "aedes-persistence": "^6.0.0",
     "fastparallel": "^2.3.0",
     "multistream": "^2.1.0",
-    "qlobber": "^1.8.0"
+    "qlobber": "^3.0.2"
   }
 }
