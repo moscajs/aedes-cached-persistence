@@ -51,9 +51,13 @@ function CachedPersistence (opts) {
         that._trie.remove(sub.topic, sub)
       }
     }
-    var action = packet.topic === newSubTopic ? 'sub' : 'unsub'
-    var waiting = that._waiting[clientId + '-' + action]
-    delete that._waiting[clientId + '-' + action]
+    var action = packet.topic === newSubTopic ? 'sub_' : 'unsub_'
+    var key = clientId + '-' + action
+    if (decoded.subs.length > 0) {
+      key = clientId + '-' + action + decoded.subs[0].topic
+    }
+    var waiting = that._waiting[key]
+    that._waiting[key] = undefined
     if (waiting) {
       process.nextTick(waiting)
     }
@@ -75,7 +79,7 @@ CachedPersistence.prototype._addedSubscriptions = function (client, subs, cb) {
 
   var errored = false
 
-  this._waitFor(client, 'sub', function (err) {
+  this._waitFor(client, 'sub_' + subs[0].topic, function (err) {
     if (!errored && err) {
       return cb(err)
     }
@@ -120,8 +124,12 @@ CachedPersistence.prototype._removedSubscriptions = function (client, subs, cb) 
     return
   }
   var errored = false
+  var key = subs
 
-  this._waitFor(client, 'unsub', function (err) {
+  if (subs.length > 0) {
+    key = subs[0].topic
+  }
+  this._waitFor(client, 'unsub_' + key, function (err) {
     if (!errored && err) {
       return cb(err)
     }
