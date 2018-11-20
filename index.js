@@ -108,7 +108,7 @@ CachedPersistence.prototype._addedSubscriptions = function (client, subs, cb) {
 }
 
 function brokerPublish (subs, cb) {
-  var encoded = JSON.stringify({clientId: this.client.id, subs: subs})
+  var encoded = JSON.stringify({ clientId: this.client.id, subs: subs })
   var packet = new Packet({
     topic: this.topic,
     payload: encoded

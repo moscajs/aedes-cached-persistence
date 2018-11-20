@@ -32,8 +32,8 @@ util.inherits(MyPersistence, CachedPersistence)
   'createRetainedStream',
   'outgoingStream', 'subscriptionsByClient',
   'getWill', 'streamWill', 'getClientList', 'destroy'].forEach(function (key) {
-    MyPersistence.prototype[key] = Memory.prototype[key]
-  })
+  MyPersistence.prototype[key] = Memory.prototype[key]
+})
 
 MyPersistence.prototype.addSubscriptions = function (client, subs, cb) {
   var stored = this._subscriptions.get(client.id)
