@@ -12,24 +12,24 @@ Abstract class to write an [Aedes][aedes] [persistence][aedes-persistence] with 
 It implements the API defined by [aedes-persistence](persistence).
 
 * [Install](#install)
-* [Provided methods](#api)
-* [Implement another persistence](#implement)
+* [Provided methods](#provided-methods)
+* [Implement another persistence](#implement-another-persistence)
 * [License](#license)
 
-<a name="install"></a>
 ## Install
+
 To install aedes-cached-persistence, simply use npm:
 
-```
+```sh
 npm install aedes-cached-persistence --save
 ```
 
 ## Provided methods
 
-  * <a href="http://github.com/mcollina/aedes-persistence#constructor"><code><b>CachedPersistence()</b></code></a>
-  * <a href="http://github.com/mcollina/aedes-persistence#subscriptionsByTopic"><code>instance.<b>subscriptionsByTopic()</b></code></a>
-  * <a href="http://github.com/mcollina/aedes-persistence#cleanSubscriptions"><code>instance.<b>cleanSubscriptions()</b></code></a>
-  * <a href="http://github.com/mcollina/aedes-persistence#destroy"><code>instance.<b>destroy()</b></code></a>
+* <a href="http://github.com/mcollina/aedes-persistence#constructor"><code><b>CachedPersistence()</b></code></a>
+* <a href="http://github.com/mcollina/aedes-persistence#subscriptionsByTopic"><code>instance.<b>subscriptionsByTopic()</b></code></a>
+* <a href="http://github.com/mcollina/aedes-persistence#cleanSubscriptions"><code>instance.<b>cleanSubscriptions()</b></code></a>
+* <a href="http://github.com/mcollina/aedes-persistence#destroy"><code>instance.<b>destroy()</b></code></a>
 
 ## Implement another persistence
 
