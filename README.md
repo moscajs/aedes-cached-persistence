@@ -1,27 +1,35 @@
-# aedes-cached-persistence&nbsp;&nbsp;[![Build Status](https://travis-ci.org/mcollina/aedes-cached-persistence.svg)](https://travis-ci.org/mcollina/aedes-cached-persistence)
+# aedes-cached-persistence
+[![Build Status](https://travis-ci.org/mcollina/aedes-cached-persistence.svg?branch=master)](https://travis-ci.org/mcollina/aedes-cached-persistence)
+[![Dependencies Status](https://david-dm.org/mcollina/aedes-cached-persistence/status.svg)](https://david-dm.org/mcollina/aedes-cached-persistence)
+[![devDependencies Status](https://david-dm.org/mcollina/aedes-cached-persistence/dev-status.svg)](https://david-dm.org/mcollina/aedes-cached-persistence?type=dev)
+<br/>
+[![Known Vulnerabilities](https://snyk.io/test/github/mcollina/aedes-cached-persistence/badge.svg)](https://snyk.io/test/github/mcollina/aedes-cached-persistence)
+[![Coverage Status](https://coveralls.io/repos/mcollina/aedes-cached-persistence/badge.svg?branch=master&service=github)](https://coveralls.io/github/mcollina/aedes-cached-persistence?branch=master)
+[![NPM version](https://img.shields.io/npm/v/aedes-cached-persistence.svg?style=flat)](https://www.npmjs.com/package/aedes-cached-persistence)
+[![NPM downloads](https://img.shields.io/npm/dm/aedes-cached-persistence.svg?style=flat)](https://www.npmjs.com/package/aedes-cached-persistence)
 
-Abstract class to write an [Aedes][aedes] [persistence][persistence] with in-process caching of subscriptions.
+Abstract class to write an [Aedes][aedes] [persistence][aedes-persistence] with in-process caching of subscriptions.
 It implements the API defined by [aedes-persistence](persistence).
 
 * [Install](#install)
-* [Provided methods](#api)
-* [Implement another persistence](#implement)
+* [Provided methods](#provided-methods)
+* [Implement another persistence](#implement-another-persistence)
 * [License](#license)
 
-<a name="install"></a>
 ## Install
-To install aedes-cached--persistence, simply use npm:
 
-```
+To install aedes-cached-persistence, simply use npm:
+
+```sh
 npm install aedes-cached-persistence --save
 ```
 
 ## Provided methods
 
-  * <a href="http://github.com/mcollina/aedes-persistence#constructor"><code><b>CachedPersistence()</b></code></a>
-  * <a href="http://github.com/mcollina/aedes-persistence#subscriptionsByTopic"><code>instance.<b>subscriptionsByTopic()</b></code></a>
-  * <a href="http://github.com/mcollina/aedes-persistence#cleanSubscriptions"><code>instance.<b>cleanSubscriptions()</b></code></a>
-  * <a href="http://github.com/mcollina/aedes-persistence#destroy"><code>instance.<b>destroy()</b></code></a>
+* <a href="http://github.com/mcollina/aedes-persistence#constructor"><code><b>CachedPersistence()</b></code></a>
+* <a href="http://github.com/mcollina/aedes-persistence#subscriptionsByTopic"><code>instance.<b>subscriptionsByTopic()</b></code></a>
+* <a href="http://github.com/mcollina/aedes-persistence#cleanSubscriptions"><code>instance.<b>cleanSubscriptions()</b></code></a>
+* <a href="http://github.com/mcollina/aedes-persistence#destroy"><code>instance.<b>destroy()</b></code></a>
 
 ## Implement another persistence
 
