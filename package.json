@@ -46,6 +46,7 @@
     "aedes-packet": "^2.1.0",
     "aedes-persistence": "^7.1.1",
     "fastparallel": "^2.3.0",
+    "from2": "^2.3.0",
     "multistream": "^4.0.0",
     "qlobber": "^3.1.0"
   }
