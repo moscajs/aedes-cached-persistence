@@ -1,5 +1,5 @@
 # aedes-cached-persistence
-[![Build Status](https://travis-ci.org/mcollina/aedes-cached-persistence.svg?branch=master)](https://travis-ci.org/mcollina/aedes-cached-persistence)
+![.github/workflows/ci.yml](https://github.com/robertsLando/aedes-cached-persistence/workflows/.github/workflows/ci.yml/badge.svg)
 [![Dependencies Status](https://david-dm.org/mcollina/aedes-cached-persistence/status.svg)](https://david-dm.org/mcollina/aedes-cached-persistence)
 [![devDependencies Status](https://david-dm.org/mcollina/aedes-cached-persistence/dev-status.svg)](https://david-dm.org/mcollina/aedes-cached-persistence?type=dev)
 <br/>
@@ -11,10 +11,13 @@
 Abstract class to write an [Aedes][aedes] [persistence][aedes-persistence] with in-process caching of subscriptions.
 It implements the API defined by [aedes-persistence](persistence).
 
-* [Install](#install)
-* [Provided methods](#provided-methods)
-* [Implement another persistence](#implement-another-persistence)
-* [License](#license)
+- [aedes-cached-persistence](#aedes-cached-persistence)
+  - [Install](#install)
+  - [Provided methods](#provided-methods)
+  - [Implement another persistence](#implement-another-persistence)
+    - [Inheritance](#inheritance)
+    - [Tests](#tests)
+  - [License](#license)
 
 ## Install
 
