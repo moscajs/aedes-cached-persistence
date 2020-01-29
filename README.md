@@ -1,5 +1,5 @@
 # aedes-cached-persistence
-![.github/workflows/ci.yml](https://github.com/robertsLando/aedes-cached-persistence/workflows/.github/workflows/ci.yml/badge.svg)
+![](https://github.com/moscajs/aedes-cached-persistence/workflows/ci.yml/badge.svg)
 [![Dependencies Status](https://david-dm.org/moscajs/aedes-cached-persistence/status.svg)](https://david-dm.org/moscajs/aedes-cached-persistence)
 [![devDependencies Status](https://david-dm.org/moscajs/aedes-cached-persistence/dev-status.svg)](https://david-dm.org/moscajs/aedes-cached-persistence?type=dev)
 <br/>
