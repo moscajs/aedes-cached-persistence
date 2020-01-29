@@ -1,10 +1,10 @@
 # aedes-cached-persistence
 ![.github/workflows/ci.yml](https://github.com/robertsLando/aedes-cached-persistence/workflows/.github/workflows/ci.yml/badge.svg)
-[![Dependencies Status](https://david-dm.org/mcollina/aedes-cached-persistence/status.svg)](https://david-dm.org/mcollina/aedes-cached-persistence)
-[![devDependencies Status](https://david-dm.org/mcollina/aedes-cached-persistence/dev-status.svg)](https://david-dm.org/mcollina/aedes-cached-persistence?type=dev)
+[![Dependencies Status](https://david-dm.org/moscajs/aedes-cached-persistence/status.svg)](https://david-dm.org/moscajs/aedes-cached-persistence)
+[![devDependencies Status](https://david-dm.org/moscajs/aedes-cached-persistence/dev-status.svg)](https://david-dm.org/moscajs/aedes-cached-persistence?type=dev)
 <br/>
-[![Known Vulnerabilities](https://snyk.io/test/github/mcollina/aedes-cached-persistence/badge.svg)](https://snyk.io/test/github/mcollina/aedes-cached-persistence)
-[![Coverage Status](https://coveralls.io/repos/mcollina/aedes-cached-persistence/badge.svg?branch=master&service=github)](https://coveralls.io/github/mcollina/aedes-cached-persistence?branch=master)
+[![Known Vulnerabilities](https://snyk.io/test/github/moscajs/aedes-cached-persistence/badge.svg)](https://snyk.io/test/github/moscajs/aedes-cached-persistence)
+[![Coverage Status](https://coveralls.io/repos/moscajs/aedes-cached-persistence/badge.svg?branch=master&service=github)](https://coveralls.io/github/moscajs/aedes-cached-persistence?branch=master)
 [![NPM version](https://img.shields.io/npm/v/aedes-cached-persistence.svg?style=flat)](https://www.npmjs.com/package/aedes-cached-persistence)
 [![NPM downloads](https://img.shields.io/npm/dm/aedes-cached-persistence.svg?style=flat)](https://www.npmjs.com/package/aedes-cached-persistence)
 
@@ -29,10 +29,10 @@ npm install aedes-cached-persistence --save
 
 ## Provided methods
 
-* <a href="http://github.com/mcollina/aedes-persistence#constructor"><code><b>CachedPersistence()</b></code></a>
-* <a href="http://github.com/mcollina/aedes-persistence#subscriptionsByTopic"><code>instance.<b>subscriptionsByTopic()</b></code></a>
-* <a href="http://github.com/mcollina/aedes-persistence#cleanSubscriptions"><code>instance.<b>cleanSubscriptions()</b></code></a>
-* <a href="http://github.com/mcollina/aedes-persistence#destroy"><code>instance.<b>destroy()</b></code></a>
+* <a href="http://github.com/moscajs/aedes-persistence#constructor"><code><b>CachedPersistence()</b></code></a>
+* <a href="http://github.com/moscajs/aedes-persistence#subscriptionsByTopic"><code>instance.<b>subscriptionsByTopic()</b></code></a>
+* <a href="http://github.com/moscajs/aedes-persistence#cleanSubscriptions"><code>instance.<b>cleanSubscriptions()</b></code></a>
+* <a href="http://github.com/moscajs/aedes-persistence#destroy"><code>instance.<b>destroy()</b></code></a>
 
 ## Implement another persistence
 
