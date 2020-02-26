@@ -65,7 +65,7 @@
     "through2": "^3.0.1"
   },
   "dependencies": {
-    "aedes-packet": "^2.1.0",
+    "aedes-packet": "^2.3.1",
     "aedes-persistence": "^8.0.0",
     "fastparallel": "^2.3.0",
     "multistream": "^4.0.0",
