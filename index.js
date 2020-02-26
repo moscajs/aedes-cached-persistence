@@ -6,6 +6,7 @@ var EE = require('events').EventEmitter
 var inherits = require('util').inherits
 var MultiStream = require('multistream')
 var parallel = require('fastparallel')
+var from = require('from2')
 
 var QlobberOpts = {
   wildcard_one: '+',
@@ -188,6 +189,57 @@ CachedPersistence.prototype.createRetainedStreamCombi = function (patterns) {
     return that.createRetainedStream(p)
   })
   return MultiStream.obj(streams)
+}
+
+CachedPersistence.prototype.addSubsToCache = function (clientId, topics) {
+  for (var topic in topics) {
+    this._trie.add(topic, {
+      clientId: clientId,
+      topic: topic,
+      qos: topics[topic]
+    })
+  }
+}
+
+CachedPersistence.prototype.removeSubsFromCache = function (clientId, topics) {
+  for (var topic in topics) {
+    this._trie.remove(topic, {
+      clientId: clientId,
+      topic: topic,
+      qos: topics[topic]
+    })
+  }
+}
+
+CachedPersistence.prototype.getClientList = function (topic) {
+  var entries = this._trie.match(topic, topic)
+
+  function pushClientList (size, next) {
+    if (entries.length === 0) {
+      return next(null, null)
+    }
+    var chunk = entries.slice(0, 1)
+    entries = entries.slice(1)
+    next(null, chunk[0].clientId)
+  }
+
+  return from.obj(pushClientList)
+}
+
+CachedPersistence.prototype.countOfflineClients = function (cb) {
+  cb(new Error('Not Implemented'))
+}
+
+CachedPersistence.prototype.countOffline = function (cb) {
+  var that = this
+
+  this.countOfflineClients(function (err, count) {
+    if (err) {
+      return cb(err)
+    }
+
+    cb(null, that._trie.subscriptionsCount, parseInt(count) || 0)
+  })
 }
 
 CachedPersistence.prototype.destroy = function (cb) {
