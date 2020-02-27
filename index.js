@@ -1,20 +1,20 @@
 'use strict'
 
-var QlobberSub = require('qlobber/aedes/qlobber-sub')
-var Packet = require('aedes-packet')
-var EE = require('events').EventEmitter
-var inherits = require('util').inherits
-var MultiStream = require('multistream')
-var parallel = require('fastparallel')
-
-var QlobberOpts = {
+const QlobberSub = require('qlobber/aedes/qlobber-sub')
+const { Packet } = require('aedes-persistence')
+const EE = require('events').EventEmitter
+const inherits = require('util').inherits
+const MultiStream = require('multistream')
+const parallel = require('fastparallel')
+const QlobberOpts = {
   wildcard_one: '+',
   wildcard_some: '#',
-  separator: '/'
+  separator: '/',
+  match_empty_levels: true
 }
-var newSubTopic = '$SYS/sub/add'
-var rmSubTopic = '$SYS/sub/rm'
-var subTopic = '$SYS/sub/+'
+const newSubTopic = '$SYS/sub/add'
+const rmSubTopic = '$SYS/sub/rm'
+const subTopic = '$SYS/sub/+'
 
 function CachedPersistence (opts) {
   if (!(this instanceof CachedPersistence)) {
@@ -29,7 +29,7 @@ function CachedPersistence (opts) {
   this._trie = new QlobberSub(QlobberOpts)
   this._waiting = {}
 
-  var that = this
+  const that = this
 
   this.once('ready', function () {
     that.ready = true
@@ -92,7 +92,7 @@ CachedPersistence.prototype._addedSubscriptions = function (client, subs, cb) {
     return cb(null, client)
   }
 
-  var ctx = {
+  const ctx = {
     cb: cb || noop,
     client: client,
     broker: this._broker,
@@ -138,7 +138,7 @@ CachedPersistence.prototype._removedSubscriptions = function (client, subs, cb) 
     }
   })
 
-  var ctx = {
+  const ctx = {
     cb: cb || noop,
     client: client,
     broker: this._broker,
@@ -163,7 +163,7 @@ CachedPersistence.prototype.subscriptionsByTopic = function (topic, cb) {
 }
 
 CachedPersistence.prototype.cleanSubscriptions = function (client, cb) {
-  var that = this
+  const that = this
   this.subscriptionsByClient(client, function (err, subs, client) {
     if (err || !subs) { return cb(err, client) }
     subs = subs.map(subToTopic)
@@ -183,7 +183,7 @@ function outgoingEnqueue (sub, cb) {
 }
 
 CachedPersistence.prototype.createRetainedStreamCombi = function (patterns) {
-  var that = this
+  const that = this
   var streams = patterns.map(function (p) {
     return that.createRetainedStream(p)
   })
