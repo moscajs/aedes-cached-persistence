@@ -58,7 +58,7 @@
     "mqemitter": "^4.1.1",
     "nyc": "^15.0.0",
     "pump": "^3.0.0",
-    "release-it": "^12.6.1",
+    "release-it": "^13.5.5",
     "snazzy": "^8.0.0",
     "standard": "^14.3.1",
     "tape": "^4.13.0",
