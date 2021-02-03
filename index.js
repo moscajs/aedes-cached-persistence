@@ -1,3 +1,4 @@
+/* eslint-disable no-var */
 'use strict'
 
 const QlobberSub = require('qlobber/aedes/qlobber-sub')
@@ -38,7 +39,7 @@ function CachedPersistence (opts) {
   this._onMessage = function onSubMessage (packet, cb) {
     const decoded = JSON.parse(packet.payload)
     const clientId = decoded.clientId
-    for (let i = 0; i < decoded.subs.length; i++) {
+    for (var i = 0; i < decoded.subs.length; i++) {
       const sub = decoded.subs[i]
       sub.clientId = clientId
       if (packet.topic === newSubTopic) {
@@ -52,7 +53,7 @@ function CachedPersistence (opts) {
       }
     }
     const action = packet.topic === newSubTopic ? 'sub_' : 'unsub_'
-    let key = clientId + '-' + action
+    var key = clientId + '-' + action
     if (decoded.subs.length > 0) {
       key = clientId + '-' + action + decoded.subs[0].topic
     }
@@ -77,7 +78,7 @@ CachedPersistence.prototype._addedSubscriptions = function (client, subs, cb) {
     return
   }
 
-  let errored = false
+  var errored = false
 
   this._waitFor(client, 'sub_' + subs[0].topic, function (err) {
     if (!errored && err) {
@@ -123,8 +124,8 @@ CachedPersistence.prototype._removedSubscriptions = function (client, subs, cb) 
     this.once('ready', this._removedSubscriptions.bind(this, client, subs, cb))
     return
   }
-  let errored = false
-  let key = subs
+  var errored = false
+  var key = subs
 
   if (subs.length > 0) {
     key = subs[0].topic
