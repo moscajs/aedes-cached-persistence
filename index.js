@@ -36,10 +36,10 @@ function CachedPersistence (opts) {
   })
 
   this._onMessage = function onSubMessage (packet, cb) {
-    var decoded = JSON.parse(packet.payload)
-    var clientId = decoded.clientId
-    for (var i = 0; i < decoded.subs.length; i++) {
-      var sub = decoded.subs[i]
+    const decoded = JSON.parse(packet.payload)
+    const clientId = decoded.clientId
+    for (let i = 0; i < decoded.subs.length; i++) {
+      const sub = decoded.subs[i]
       sub.clientId = clientId
       if (packet.topic === newSubTopic) {
         if (sub.qos > 0) {
@@ -51,12 +51,12 @@ function CachedPersistence (opts) {
         that._trie.remove(sub.topic, sub)
       }
     }
-    var action = packet.topic === newSubTopic ? 'sub_' : 'unsub_'
-    var key = clientId + '-' + action
+    const action = packet.topic === newSubTopic ? 'sub_' : 'unsub_'
+    let key = clientId + '-' + action
     if (decoded.subs.length > 0) {
       key = clientId + '-' + action + decoded.subs[0].topic
     }
-    var waiting = that._waiting[key]
+    const waiting = that._waiting[key]
     that._waiting[key] = undefined
     if (waiting) {
       process.nextTick(waiting)
@@ -77,7 +77,7 @@ CachedPersistence.prototype._addedSubscriptions = function (client, subs, cb) {
     return
   }
 
-  var errored = false
+  let errored = false
 
   this._waitFor(client, 'sub_' + subs[0].topic, function (err) {
     if (!errored && err) {
@@ -108,8 +108,8 @@ CachedPersistence.prototype._addedSubscriptions = function (client, subs, cb) {
 }
 
 function brokerPublish (subs, cb) {
-  var encoded = JSON.stringify({ clientId: this.client.id, subs: subs })
-  var packet = new Packet({
+  const encoded = JSON.stringify({ clientId: this.client.id, subs: subs })
+  const packet = new Packet({
     topic: this.topic,
     payload: encoded
   })
@@ -123,8 +123,8 @@ CachedPersistence.prototype._removedSubscriptions = function (client, subs, cb) 
     this.once('ready', this._removedSubscriptions.bind(this, client, subs, cb))
     return
   }
-  var errored = false
-  var key = subs
+  let errored = false
+  let key = subs
 
   if (subs.length > 0) {
     key = subs[0].topic
@@ -184,7 +184,7 @@ function outgoingEnqueue (sub, cb) {
 
 CachedPersistence.prototype.createRetainedStreamCombi = function (patterns) {
   const that = this
-  var streams = patterns.map(function (p) {
+  const streams = patterns.map(function (p) {
     return that.createRetainedStream(p)
   })
   return MultiStream.obj(streams)

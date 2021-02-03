@@ -1,10 +1,10 @@
 'use strict'
 
-var test = require('tape').test
-var CachedPersistence = require('./')
-var util = require('util')
-var Memory = require('aedes-persistence')
-var abs = require('./abstract')
+const test = require('tape').test
+const CachedPersistence = require('./')
+const util = require('util')
+const Memory = require('aedes-persistence')
+const abs = require('./abstract')
 
 function MyPersistence () {
   if (!(this instanceof MyPersistence)) {
@@ -36,7 +36,7 @@ util.inherits(MyPersistence, CachedPersistence)
 })
 
 MyPersistence.prototype.addSubscriptions = function (client, subs, cb) {
-  var stored = this._subscriptions.get(client.id)
+  let stored = this._subscriptions.get(client.id)
 
   if (!stored) {
     stored = new Map()
@@ -44,7 +44,7 @@ MyPersistence.prototype.addSubscriptions = function (client, subs, cb) {
     this._clientsCount++
   }
 
-  var subsObjs = subs.map(function mapSub (sub) {
+  const subsObjs = subs.map(function mapSub (sub) {
     stored.set(sub.topic, sub.qos)
     return {
       clientId: client.id,
@@ -57,13 +57,13 @@ MyPersistence.prototype.addSubscriptions = function (client, subs, cb) {
 }
 
 MyPersistence.prototype.removeSubscriptions = function (client, subs, cb) {
-  var stored = this._subscriptions.get(client.id)
-  var removed = []
+  const stored = this._subscriptions.get(client.id)
+  const removed = []
 
   if (stored) {
-    for (var i = 0; i < subs.length; i += 1) {
-      var topic = subs[i]
-      var qos = stored.get(topic)
+    for (let i = 0; i < subs.length; i += 1) {
+      const topic = subs[i]
+      const qos = stored.get(topic)
       if (qos !== undefined) {
         if (qos > 0) {
           removed.push({
