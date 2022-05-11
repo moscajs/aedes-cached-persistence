@@ -1,91 +1,56 @@
-'use strict'
-
 const test = require('tape').test
 const CachedPersistence = require('./')
-const util = require('util')
 const Memory = require('aedes-persistence')
 const abs = require('./abstract')
 
-function MyPersistence () {
-  if (!(this instanceof MyPersistence)) {
-    return new MyPersistence()
-  }
+class MyPersistence extends CachedPersistence {
+  constructor (opts) {
+    super(opts)
+    this.backend = opts.backend
 
-  // copied from Memory
-  this._retained = []
-  this._subscriptions = new Map()
-  this._clientsCount = 0
-  this._outgoing = {}
-  this._incoming = {}
-  this._wills = {}
-
-  CachedPersistence.call(this)
-}
-
-util.inherits(MyPersistence, CachedPersistence)
-
-// copy over methods
-;['storeRetained', 'countOffline', 'outgoingEnqueue',
-  'outgoingUpdate', 'outgoingClearMessageId',
-  'incomingStorePacket', 'incomingGetPacket',
-  'incomingDelPacket', 'putWill', 'delWill',
-  'createRetainedStream',
-  'outgoingStream', 'subscriptionsByClient',
-  'getWill', 'streamWill', 'getClientList', 'destroy'].forEach(function (key) {
-  MyPersistence.prototype[key] = Memory.prototype[key]
-})
-
-MyPersistence.prototype.addSubscriptions = function (client, subs, cb) {
-  let stored = this._subscriptions.get(client.id)
-
-  if (!stored) {
-    stored = new Map()
-    this._subscriptions.set(client.id, stored)
-    this._clientsCount++
-  }
-
-  const subsObjs = subs.map(function mapSub (sub) {
-    stored.set(sub.topic, sub.qos)
-    return {
-      clientId: client.id,
-      topic: sub.topic,
-      qos: sub.qos
+    // link methods
+    const methods = ['storeRetained', 'countOffline', 'outgoingEnqueue',
+      'outgoingUpdate', 'outgoingClearMessageId',
+      'incomingStorePacket', 'incomingGetPacket',
+      'incomingDelPacket', 'delWill',
+      'createRetainedStream',
+      'outgoingStream', 'subscriptionsByClient',
+      'getWill', 'streamWill', 'getClientList', 'destroy']
+    methods.forEach((key) => {
+      this[key] = this.backend[key].bind(this.backend)
+    })
+    // putWill is a special because it needs this.broker.id
+    this.putWill = (client, packet, cb) => {
+      this.backend.broker = this.broker
+      this.backend.putWill(client, packet, cb)
     }
-  })
+  }
 
-  this._addedSubscriptions(client, subsObjs, cb)
-}
-
-MyPersistence.prototype.removeSubscriptions = function (client, subs, cb) {
-  const stored = this._subscriptions.get(client.id)
-  const removed = []
-
-  if (stored) {
-    for (let i = 0; i < subs.length; i += 1) {
-      const topic = subs[i]
-      const qos = stored.get(topic)
-      if (qos !== undefined) {
-        if (qos > 0) {
-          removed.push({
-            clientId: client.id,
-            topic: topic,
-            qos: qos
-          })
-        }
-        stored.delete(topic)
+  addSubscriptions (client, subs, cb) {
+    this.backend.addSubscriptions(client, subs, (err) => {
+      if (err) {
+        return cb(err)
       }
-    }
-
-    if (stored.size === 0) {
-      this._clientsCount--
-      this._subscriptions.delete(client.id)
-    }
+      this._addedSubscriptions(client, subs, cb)
+    })
   }
 
-  this._removedSubscriptions(client, removed, cb)
+  removeSubscriptions (client, topics, cb) {
+    this.backend.removeSubscriptions(client, topics, (err) => {
+      if (err) {
+        return cb(err)
+      }
+      const subsObjs = topics.map(function mapSub (topic) {
+        return { topic }
+      })
+      this._removedSubscriptions(client, subsObjs, cb)
+    })
+  }
 }
+
+const persistence = () => new MyPersistence({ backend: Memory() })
 
 abs({
-  test: test,
-  persistence: MyPersistence
+  test,
+  persistence
 })
