@@ -69,7 +69,7 @@
     "tsd": "^0.14.0"
   },
   "dependencies": {
-    "aedes-persistence": "^9.1.1",
+    "aedes-persistence": "^9.1.2",
     "fastparallel": "^2.4.0",
     "multistream": "^4.0.1",
     "qlobber": "^7.0.0"
