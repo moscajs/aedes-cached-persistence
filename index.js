@@ -2,7 +2,7 @@ const QlobberSub = require('qlobber/aedes/qlobber-sub')
 const { Packet } = require('aedes-persistence')
 const MultiStream = require('multistream')
 const parallel = require('fastparallel')
-const EventEmitter = require('events')
+const { EventEmitter } = require('events')
 const QlobberOpts = {
   wildcard_one: '+',
   wildcard_some: '#',
