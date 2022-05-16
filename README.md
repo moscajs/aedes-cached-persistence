@@ -64,7 +64,7 @@ class MyPersistence extends CachedPersistence {
 }
 
 function mapSub (sub) {
-        return { topic: sub.topic }
+  return { topic: sub.topic }
 }
 ```
 
