@@ -77,6 +77,10 @@ class CachedPersistence extends EventEmitter {
       return
     }
 
+    if (subs.length === 0) {
+      return cb(null, client)
+    }
+
     let errored = false
 
     this._waitFor(client, true, subs[0].topic, (err) => {
@@ -87,10 +91,6 @@ class CachedPersistence extends EventEmitter {
         cb(null, client)
       }
     })
-
-    if (subs.length === 0) {
-      return cb(null, client)
-    }
 
     const ctx = {
       cb: cb || noop,
