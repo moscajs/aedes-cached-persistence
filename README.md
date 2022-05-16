@@ -54,20 +54,17 @@ class MyPersistence extends CachedPersistence {
     addSubscriptions(client, subs, cb) {
         // ..persistence specific implementation..
         // call super._addedSubscriptions when you are done
-        super._addedSubscriptions(client, subsObjs, cb)
+        super._addedSubscriptions(client, subs.map(mapSub), cb)
     }
     removeSubscriptions(client, subs, cb) {
         // ..persistence specific implementation..
-        // call super._addedSubscriptions when you are done
-        super._removedSubscriptions(client, subs.map(subs, client), cb)
+        // call super._removedSubscriptions when you are done
+        super._removedSubscriptions(client, subs.map(mapSub), cb)
     }
 }
 
-function toSubObj (sub) {
-  return {
-    clientId: this.id,
-    topic: sub.topic
-  }
+function mapSub (sub) {
+        return { topic: sub.topic }
 }
 ```
 

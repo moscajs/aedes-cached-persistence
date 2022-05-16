@@ -31,7 +31,7 @@ class MyPersistence extends CachedPersistence {
       if (err) {
         return cb(err)
       }
-      this._addedSubscriptions(client, subs, cb)
+      super._addedSubscriptions(client, subs, cb)
     })
   }
 
@@ -43,7 +43,7 @@ class MyPersistence extends CachedPersistence {
       const subsObjs = topics.map(function mapSub (topic) {
         return { topic }
       })
-      this._removedSubscriptions(client, subsObjs, cb)
+      super._removedSubscriptions(client, subsObjs, cb)
     })
   }
 }
