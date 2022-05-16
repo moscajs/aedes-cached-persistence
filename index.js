@@ -14,7 +14,7 @@ const rmSubTopic = '$SYS/sub/rm'
 const subTopic = '$SYS/sub/+'
 
 class CachedPersistence extends EventEmitter {
-  constructor (opts) {
+  constructor(opts) {
     super()
 
     this.ready = false
@@ -30,7 +30,7 @@ class CachedPersistence extends EventEmitter {
     this._onSubMessage = this._onMessage.bind(this)
   }
 
-  _onMessage (packet, cb) {
+  _onMessage(packet, cb) {
     const decoded = JSON.parse(packet.payload)
     const clientId = decoded.clientId
     for (let i = 0; i < decoded.subs.length; i++) {
@@ -46,33 +46,32 @@ class CachedPersistence extends EventEmitter {
         this._trie.remove(sub.topic, sub)
       }
     }
-    const action = packet.topic === newSubTopic ? 'sub_' : 'unsub_'
-    let key = clientId + '-' + action
+
     if (decoded.subs.length > 0) {
-      key = clientId + '-' + action + decoded.subs[0].topic
-    }
-    const waiting = this._waiting.get(key)
-    if (waiting) {
-      this._waiting.delete(key)
-      process.nextTick(waiting)
+      const key = getKey(clientId, packet.topic === newSubTopic, decoded.subs[0].topic)
+      const waiting = this._waiting.get(key)
+      if (waiting) {
+        this._waiting.delete(key)
+        process.nextTick(waiting)
+      }
     }
     cb()
   }
 
-  get broker () {
+  get broker() {
     return this._broker
   }
 
-  set broker (broker) {
+  set broker(broker) {
     this._broker = broker
     this.broker.subscribe(subTopic, this._onSubMessage, this._setup.bind(this))
   }
 
-  _waitFor (client, action, cb) {
-    this._waiting.set(client.id + '-' + action, cb)
+  _waitFor(client, isSub, topic, cb) {
+    this._waiting.set(getKey(client.id, isSub, topic), cb)
   }
 
-  _addedSubscriptions (client, subs, cb) {
+  _addedSubscriptions(client, subs, cb) {
     if (!this.ready) {
       this.once('ready', this._addedSubscriptions.bind(this, client, subs, cb))
       return
@@ -80,7 +79,7 @@ class CachedPersistence extends EventEmitter {
 
     let errored = false
 
-    this._waitFor(client, 'sub_' + subs[0].topic, (err) => {
+    this._waitFor(client, true, subs[0].topic, (err) => {
       if (!errored && err) {
         return cb(err)
       }
@@ -108,7 +107,7 @@ class CachedPersistence extends EventEmitter {
     })
   }
 
-  _removedSubscriptions (client, subs, cb) {
+  _removedSubscriptions(client, subs, cb) {
     if (!this.ready) {
       this.once('ready', this._removedSubscriptions.bind(this, client, subs, cb))
       return
@@ -119,7 +118,7 @@ class CachedPersistence extends EventEmitter {
     if (subs.length > 0) {
       key = subs[0].topic
     }
-    this._waitFor(client, 'unsub_' + key, (err) => {
+    this._waitFor(client, false, key, (err) => {
       if (!errored && err) {
         return cb(err)
       }
@@ -143,7 +142,7 @@ class CachedPersistence extends EventEmitter {
     })
   }
 
-  subscriptionsByTopic (topic, cb) {
+  subscriptionsByTopic(topic, cb) {
     if (!this.ready) {
       this.once('ready', this.subscriptionsByTopic.bind(this, topic, cb))
       return this
@@ -152,7 +151,7 @@ class CachedPersistence extends EventEmitter {
     cb(null, this._trie.match(topic))
   }
 
-  cleanSubscriptions (client, cb) {
+  cleanSubscriptions(client, cb) {
     this.subscriptionsByClient(client, (err, subs, client) => {
       if (err || !subs) { return cb(err, client) }
       subs = subs.map(subToTopic)
@@ -160,21 +159,21 @@ class CachedPersistence extends EventEmitter {
     })
   }
 
-  outgoingEnqueueCombi (subs, packet, cb) {
+  outgoingEnqueueCombi(subs, packet, cb) {
     this._parallel({
       persistence: this,
       packet
     }, outgoingEnqueue, subs, cb)
   }
 
-  createRetainedStreamCombi (patterns) {
+  createRetainedStreamCombi(patterns) {
     const streams = patterns.map((p) => {
       return this.createRetainedStream(p)
     })
     return MultiStream.obj(streams)
   }
 
-  destroy (cb) {
+  destroy(cb) {
     this.destroyed = true
     this.broker.unsubscribe(subTopic, this._onSubMessage, () => {
       if (cb) {
@@ -184,12 +183,12 @@ class CachedPersistence extends EventEmitter {
   }
 
   // must emit 'ready'
-  _setup () {
+  _setup() {
     this.emit('ready')
   }
 }
 
-function brokerPublish (subs, cb) {
+function brokerPublish(subs, cb) {
   const encoded = JSON.stringify({ clientId: this.client.id, subs })
   const packet = new Packet({
     topic: this.topic,
@@ -198,14 +197,18 @@ function brokerPublish (subs, cb) {
   this.broker.publish(packet, cb)
 }
 
-function noop () { }
+function noop() { }
 
-function outgoingEnqueue (sub, cb) {
+function outgoingEnqueue(sub, cb) {
   this.persistence.outgoingEnqueue(sub, this.packet, cb)
 }
 
-function subToTopic (sub) {
+function subToTopic(sub) {
   return sub.topic
+}
+
+function getKey(clientId, isSub, topic) {
+  return clientId + '-' + (isSub ? 'sub_' : 'unsub_') + (topic || '')
 }
 
 module.exports = CachedPersistence
