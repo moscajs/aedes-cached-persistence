@@ -41,45 +41,30 @@ npm install aedes-cached-persistence --save
 In order to reuse aedes-cached-persistence, you need to:
 
 ```js
-'use strict'
-
-var util = require('util')
-var CachedPersistence = require('aedes-cached-persistence')
+const CachedPersistence = require('aedes-cached-persistence')
 
 // if you need http://npm.im/aedes-packet, it is available
 // from this module as well
-// var Packet = CachedPersistence.Packet
+// const { Packet } = CachedPersistence
 
-function MyPersistence (opts) {
-  if (!(this instanceof MyPersistence)) {
-    return new MyPersistence(opts)
-  }
-  // initialize your data here
-
-  CachedPersistence.call(this, opts)
+class MyPersistence extends CachedPersistence {
+    constructor(opts) {
+       super(opts)
+    }
+    addSubscriptions(client, subs, cb) {
+        // ..persistence specific implementation..
+        // call super._addedSubscriptions when you are done
+        super._addedSubscriptions(client, subs.map(mapSub), cb)
+    }
+    removeSubscriptions(client, subs, cb) {
+        // ..persistence specific implementation..
+        // call super._removedSubscriptions when you are done
+        super._removedSubscriptions(client, subs.map(mapSub), cb)
+    }
 }
 
-util.inherits(MyPersistence, CachedPersistence)
-
-MyPersistence.prototype.addSubscriptions = function (client, subs, cb) {
-  // ..persistence specific implementation..
-
-  // call this._addedSubscriptions when you are done
-  this._addedSubscriptions(client, subsObjs, cb)
-}
-
-MyPersistence.prototype.removeSubscriptions = function (client, subs, cb) {
-  // ..persistence specific implementation..
-
-  // call this._addedSubscriptions when you are done
-  this._removedSubscriptions(client, subs.map(subs, client), cb)
-}
-
-function toSubObj (sub) {
-  return {
-    clientId: this.id,
-    topic: sub.topic
-  }
+function mapSub (sub) {
+  return { topic: sub.topic }
 }
 ```
 
