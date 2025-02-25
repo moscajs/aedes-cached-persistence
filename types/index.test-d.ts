@@ -4,7 +4,7 @@ import type {
   CallbackError,
 } from 'aedes-persistence';
 import { expectType } from 'tsd';
-import aedesCachedPersistence, { AedesCachedPersistence, Packet } from '.';
+import aedesCachedPersistence, { type AedesCachedPersistence, type Packet } from '.';
 
 expectType<AedesCachedPersistence>(aedesCachedPersistence());
 

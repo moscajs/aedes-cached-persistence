@@ -2,7 +2,7 @@ const QlobberSub = require('qlobber/aedes/qlobber-sub')
 const { Packet } = require('aedes-persistence')
 const MultiStream = require('multistream')
 const parallel = require('fastparallel')
-const { EventEmitter } = require('events')
+const { EventEmitter } = require('node:events')
 const QlobberOpts = {
   wildcard_one: '+',
   wildcard_some: '#',
@@ -154,8 +154,8 @@ class CachedPersistence extends EventEmitter {
   cleanSubscriptions (client, cb) {
     this.subscriptionsByClient(client, (err, subs, client) => {
       if (err || !subs) { return cb(err, client) }
-      subs = subs.map(subToTopic)
-      this.removeSubscriptions(client, subs, cb)
+      const newSubs = subs.map(subToTopic)
+      this.removeSubscriptions(client, newSubs, cb)
     })
   }
 
@@ -208,7 +208,7 @@ function subToTopic (sub) {
 }
 
 function getKey (clientId, isSub, topic) {
-  return clientId + '-' + (isSub ? 'sub_' : 'unsub_') + (topic || '')
+  return `${clientId}-${isSub ? 'sub_' : 'unsub_'}${topic || ''}`
 }
 
 module.exports = CachedPersistence

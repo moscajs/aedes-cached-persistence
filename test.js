@@ -1,4 +1,4 @@
-const test = require('tape').test
+const test = require('node:test')
 const CachedPersistence = require('./')
 const Memory = require('aedes-persistence')
 const abs = require('./abstract')
@@ -16,9 +16,9 @@ class MyPersistence extends CachedPersistence {
       'createRetainedStream',
       'outgoingStream', 'subscriptionsByClient',
       'getWill', 'streamWill', 'getClientList', 'destroy']
-    methods.forEach((key) => {
+    for (const key of methods) {
       this[key] = this.backend[key].bind(this.backend)
-    })
+    }
     // putWill is a special because it needs this.broker.id
     this.putWill = (client, packet, cb) => {
       this.backend.broker = this.broker
