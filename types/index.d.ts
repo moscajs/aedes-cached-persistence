@@ -5,8 +5,8 @@ import type {
   CallbackError,
   Packet,
 } from 'aedes-persistence';
-import type { EventEmitter } from 'events';
-import type { Readable } from 'stream';
+import type { EventEmitter } from 'node:events';
+import type { Readable } from 'node:stream';
 
 export type { Packet } from 'aedes-persistence';
 
