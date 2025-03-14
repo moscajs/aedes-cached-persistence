@@ -55,7 +55,7 @@
 	"homepage": "https://github.com/moscajs/aedes-cached-persistence#readme",
 	"devDependencies": {
 		"aedes": "^0.51.3",
-		"eslint": "^9.21.0",
+		"eslint": "^9.22.0",
 		"license-checker": "^25.0.1",
 		"neostandard": "^0.12.1",
 		"nyc": "^17.1.0",
@@ -63,7 +63,7 @@
 		"tsd": "^0.31.2"
 	},
 	"dependencies": {
-		"aedes-persistence": "^10.0.0",
+		"aedes-persistence": "^10.0.1",
 		"fastparallel": "^2.4.1",
 		"multistream": "^4.1.0",
 		"qlobber": "^8.0.1"

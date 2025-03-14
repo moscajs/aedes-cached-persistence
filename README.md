@@ -73,7 +73,7 @@ A persistence needs to pass all tests defined in
 in the following manner:
 
 ```js
-var test = require('tape').test
+var test = require('node:test')
 var myperst = require('./')
 var abs = require('aedes-cached-persistence/abstract')
 
@@ -87,7 +87,7 @@ If you require some async stuff before returning, a callback is also
 supported:
 
 ```js
-var test = require('tape').test
+var test = require('node:test')
 var myperst = require('./')
 var abs = require('aedes-persistence/abstract')
 var clean = require('./clean') // invented module
