@@ -116,7 +116,7 @@ class CallBackPersistence extends CachedPersistence {
       .catch(cb)
   }
 
-  destroy (cb=noop) {
+  destroy (cb = noop) {
     if (!this.ready) {
       this.once('ready', this.destroy.bind(this, cb))
       return
