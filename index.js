@@ -1,6 +1,6 @@
 const QlobberSub = require('qlobber/aedes/qlobber-sub')
 const { Packet } = require('aedes-persistence')
-const MultiStream = require('multistream')
+const { Readable } = require('node:stream')
 const parallel = require('fastparallel')
 const { EventEmitter } = require('node:events')
 const QlobberOpts = {
@@ -12,6 +12,14 @@ const QlobberOpts = {
 const newSubTopic = '$SYS/sub/add'
 const rmSubTopic = '$SYS/sub/rm'
 const subTopic = '$SYS/sub/+'
+
+async function * multiStream (streams) {
+  for (const stream of streams) {
+    for await (const chunk of stream) {
+      yield chunk
+    }
+  }
+}
 
 class CachedPersistence extends EventEmitter {
   constructor (opts) {
@@ -167,10 +175,8 @@ class CachedPersistence extends EventEmitter {
   }
 
   createRetainedStreamCombi (patterns) {
-    const streams = patterns.map((p) => {
-      return this.createRetainedStream(p)
-    })
-    return MultiStream.obj(streams)
+    const streams = patterns.map(p => this.createRetainedStream(p))
+    return Readable.from(multiStream(streams), { objectMode: true })
   }
 
   destroy (cb) {

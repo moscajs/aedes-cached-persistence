@@ -73,9 +73,9 @@ A persistence needs to pass all tests defined in
 in the following manner:
 
 ```js
-var test = require('node:test')
-var myperst = require('./')
-var abs = require('aedes-cached-persistence/abstract')
+const test = require('node:test')
+const myperst = require('./')
+const abs = require('aedes-cached-persistence/abstract')
 
 abs({
   test: test,
@@ -87,10 +87,10 @@ If you require some async stuff before returning, a callback is also
 supported:
 
 ```js
-var test = require('node:test')
-var myperst = require('./')
-var abs = require('aedes-persistence/abstract')
-var clean = require('./clean') // invented module
+const test = require('node:test')
+const myperst = require('./')
+const abs = require('aedes-persistence/abstract')
+const clean = require('./clean') // invented module
 
 abs({
   test: test,
@@ -107,5 +107,5 @@ abs({
 
 MIT
 
-[aedes]: http://npm.im/aedes
-[aedes-persistence]: http://npm.im/aedes-persistence
+[aedes]: http://npmjs.com/package/aedes
+[aedes-persistence]: http://npmjs.com/package/aedes-persistence

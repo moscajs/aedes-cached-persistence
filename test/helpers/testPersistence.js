@@ -1,9 +1,7 @@
-const test = require('node:test')
-const CachedPersistence = require('./')
-const Memory = require('aedes-persistence')
-const abs = require('./abstract')
+'use strict'
+const CachedPersistence = require('../..')
 
-class MyPersistence extends CachedPersistence {
+class TestPersistence extends CachedPersistence {
   constructor (opts) {
     super(opts)
     this.backend = opts.backend
@@ -19,6 +17,7 @@ class MyPersistence extends CachedPersistence {
     for (const key of methods) {
       this[key] = this.backend[key].bind(this.backend)
     }
+
     // putWill is a special because it needs this.broker.id
     this.putWill = (client, packet, cb) => {
       this.backend.broker = this.broker
@@ -48,9 +47,4 @@ class MyPersistence extends CachedPersistence {
   }
 }
 
-const persistence = () => new MyPersistence({ backend: Memory() })
-
-abs({
-  test,
-  persistence
-})
+module.exports = { TestPersistence }
