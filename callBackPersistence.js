@@ -55,21 +55,11 @@ class CallBackPersistence extends CachedPersistence {
       this.once('ready', this.addSubscriptions.bind(this, client, subs, cb))
       return
     }
-
-    const addSubs1 = this.asyncPersistence.addSubscriptions(client, subs)
-    // promisify
-    const addSubs2 = new Promise((resolve, reject) => {
-      this._addedSubscriptions(client, subs, (err) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve()
-        }
-      })
-    })
-    Promise.all([addSubs1, addSubs2])
-      .then(() => cb(null, client))
+    this.asyncPersistence.addSubscriptions(client, subs)
       .catch(err => cb(err, client))
+      .then(() => {
+        this._addedSubscriptions(client, subs, () => cb(null, client))
+      })
   }
 
   removeSubscriptions (client, subs, cb) {
@@ -78,21 +68,12 @@ class CallBackPersistence extends CachedPersistence {
       return
     }
 
-    const remSubs1 = this.asyncPersistence.removeSubscriptions(client, subs)
-    // promisify
-    const mappedSubs = subs.map(sub => { return { topic: sub } })
-    const remSubs2 = new Promise((resolve, reject) => {
-      this._removedSubscriptions(client, mappedSubs, (err) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve()
-        }
-      })
-    })
-    Promise.all([remSubs1, remSubs2])
-      .then(() => process.nextTick(cb, null, client))
+    this.asyncPersistence.removeSubscriptions(client, subs)
       .catch(err => cb(err, client))
+      .then(() => {
+        const mappedSubs = subs.map(sub => { return { topic: sub } })
+        this._removedSubscriptions(client, mappedSubs, (err) => cb(err, client))
+      })
   }
 
   subscriptionsByClient (client, cb) {
