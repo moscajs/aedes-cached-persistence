@@ -56,10 +56,10 @@ class CallBackPersistence extends CachedPersistence {
       return
     }
     this.asyncPersistence.addSubscriptions(client, subs)
-      .catch(err => cb(err, client))
       .then(() => {
         this._addedSubscriptions(client, subs, () => cb(null, client))
       })
+      .catch(err => cb(err, client))
   }
 
   removeSubscriptions (client, subs, cb) {
@@ -69,11 +69,11 @@ class CallBackPersistence extends CachedPersistence {
     }
 
     this.asyncPersistence.removeSubscriptions(client, subs)
-      .catch(err => cb(err, client))
       .then(() => {
         const mappedSubs = subs.map(sub => { return { topic: sub } })
         this._removedSubscriptions(client, mappedSubs, (err) => cb(err, client))
       })
+      .catch(err => cb(err, client))
   }
 
   subscriptionsByClient (client, cb) {
