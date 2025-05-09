@@ -65,7 +65,6 @@
 	},
 	"dependencies": {
 		"aedes-persistence": "^10.1.0",
-		"fastparallel": "^2.4.1",
 		"qlobber": "^8.0.1"
 	}
 }
