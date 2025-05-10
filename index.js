@@ -1,7 +1,6 @@
 const QlobberSub = require('qlobber/aedes/qlobber-sub')
 const { Packet } = require('aedes-persistence')
 const { Readable } = require('node:stream')
-const parallel = require('fastparallel')
 const { EventEmitter } = require('node:events')
 const QlobberOpts = {
   wildcard_one: '+',
@@ -27,7 +26,6 @@ class CachedPersistence extends EventEmitter {
 
     this.ready = false
     this.destroyed = false
-    this._parallel = parallel()
     this._trie = new QlobberSub(QlobberOpts)
     this._waiting = new Map()
 
@@ -168,10 +166,19 @@ class CachedPersistence extends EventEmitter {
   }
 
   outgoingEnqueueCombi (subs, packet, cb) {
-    this._parallel({
-      persistence: this,
-      packet
-    }, outgoingEnqueue, subs, cb)
+    // Create an array of promises for each subscription
+    const promises = subs.map(sub => {
+      return new Promise((resolve, reject) => {
+        this.outgoingEnqueue(sub, packet, (err) => {
+          if (err) reject(err)
+          else resolve()
+        })
+      })
+    })
+
+    // Use Promise.all to execute them in parallel and only report the first failure if it occurs
+    Promise.all(promises)
+      .then(() => cb(null), err => cb(err)) // Do not use .catch() or you need an additional nextTick
   }
 
   createRetainedStreamCombi (patterns) {
@@ -204,10 +211,6 @@ function brokerPublish (subs, cb) {
 }
 
 function noop () { }
-
-function outgoingEnqueue (sub, cb) {
-  this.persistence.outgoingEnqueue(sub, this.packet, cb)
-}
 
 function subToTopic (sub) {
   return sub.topic
