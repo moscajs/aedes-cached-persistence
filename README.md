@@ -6,6 +6,10 @@
 [![NPM version](https://img.shields.io/npm/v/aedes-cached-persistence.svg?style=flat)](https://www.npmjs.com/package/aedes-cached-persistence)
 [![NPM downloads](https://img.shields.io/npm/dm/aedes-cached-persistence.svg?style=flat)](https://www.npmjs.com/package/aedes-cached-persistence)
 
+### This module has been superseded by [aedes-persistence](persistence)
+---
+
+
 Abstract class to write an [Aedes][aedes] [persistence][aedes-persistence] with in-process caching of subscriptions.
 It implements the API defined by [aedes-persistence](persistence).
 
