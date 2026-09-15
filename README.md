@@ -70,6 +70,13 @@ function mapSub (sub) {
 }
 ```
 
+Beside the subscription methods, an implementation has to provide every store
+method of the [aedes-persistence][] API, including
+`cleanIncoming(client, cb)`, required since aedes-persistence v11. It removes
+every stored incoming (QoS 2) packet of a client with a single delete-by-client
+operation, not a loop over `incomingDelPacket()`, and must not error when the
+client has nothing stored.
+
 ### Tests
 
 A persistence needs to pass all tests defined in

@@ -10,19 +10,20 @@ class TestPersistence extends CachedPersistence {
     const methods = ['storeRetained', 'countOffline', 'outgoingEnqueue',
       'outgoingUpdate', 'outgoingClearMessageId',
       'incomingStorePacket', 'incomingGetPacket',
-      'incomingDelPacket', 'delWill',
+      'incomingDelPacket', 'cleanIncoming', 'putWill', 'delWill',
       'createRetainedStream',
       'outgoingStream', 'subscriptionsByClient',
       'getWill', 'streamWill', 'getClientList', 'destroy']
     for (const key of methods) {
       this[key] = this.backend[key].bind(this.backend)
     }
+  }
 
-    // putWill is a special because it needs this.broker.id
-    this.putWill = (client, packet, cb) => {
-      this.backend.broker = this.broker
-      this.backend.putWill(client, packet, cb)
-    }
+  // the backend is a persistence in its own right: it queues every call until
+  // it gets a broker, so hand it ours before we announce we are ready
+  _setup () {
+    this.backend.broker = this.broker
+    super._setup()
   }
 
   addSubscriptions (client, subs, cb) {

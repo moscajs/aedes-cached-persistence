@@ -15,6 +15,13 @@ class CallBackPersistence extends CachedPersistence {
   constructor (asyncInstanceFactory, opts = {}) {
     super(opts)
     this.asyncPersistence = asyncInstanceFactory(opts)
+
+    // aedes feature-detects cleanIncoming, so don't advertise a capability the
+    // wrapped persistence lacks: a bare delegation would pass that check and
+    // then throw synchronously on every clean-session CONNECT.
+    if (typeof this.asyncPersistence.cleanIncoming !== 'function') {
+      this.cleanIncoming = undefined
+    }
   }
 
   _setup () {
@@ -184,6 +191,16 @@ class CallBackPersistence extends CachedPersistence {
     }
     this.asyncPersistence.incomingDelPacket(client, packet)
       .then(() => cb(null))
+      .catch(cb)
+  }
+
+  cleanIncoming (client, cb) {
+    if (!this.ready) {
+      this.once('ready', this.cleanIncoming.bind(this, client, cb))
+      return
+    }
+    this.asyncPersistence.cleanIncoming(client)
+      .then(() => cb(null, client))
       .catch(cb)
   }
 

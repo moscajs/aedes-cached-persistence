@@ -22,6 +22,8 @@ test('promisified', async (t) => {
     messageId: 42
   }
   const p = new PromisifiedPersistence(persistence())
+  // the persistence queues every call until it has a broker
+  p.broker = { id: 'broker-42', subscribe: (topic, fn, done) => done() }
 
   await p.incomingStorePacket(client, packet)
   const retrieved = await p.incomingGetPacket(client, {

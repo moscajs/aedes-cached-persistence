@@ -21,6 +21,7 @@ type ExcludedAedesPersistenceFunctions =
   | 'incomingStorePacket'
   | 'incomingGetPacket'
   | 'incomingDelPacket'
+  | 'cleanIncoming'
   | 'putWill'
   | 'delWill'
   | 'createRetainedStream'
