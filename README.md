@@ -71,11 +71,43 @@ function mapSub (sub) {
 ```
 
 Beside the subscription methods, an implementation has to provide every store
-method of the [aedes-persistence][] API, including
-`cleanIncoming(client, cb)`, required since aedes-persistence v11. It removes
-every stored incoming (QoS 2) packet of a client with a single delete-by-client
-operation, not a loop over `incomingDelPacket()`, and must not error when the
-client has nothing stored.
+method of the [aedes-persistence][] API, including `cleanIncoming(client, cb)`,
+added in aedes-persistence v11.
+
+`cleanIncoming` must remove every stored incoming (QoS 2) packet of that client,
+leave other clients' packets alone, and report no error when the client has
+nothing stored. `abstract.js` asserts exactly that. A single delete-by-client
+operation is cheaper than a loop over `incomingDelPacket()`, but either
+satisfies the contract.
+
+It has to accept both call forms, because aedes uses the promise one:
+
+```js
+cleanIncoming (client, cb) {
+    if (!cb) {
+        return new Promise((resolve, reject) => {
+            this.cleanIncoming(client, err => {
+                if (err) { reject(err) } else { resolve() }
+            })
+        })
+    }
+    // ..persistence specific implementation..
+    cb(null, client)
+}
+```
+
+`abstract.js` only exercises the callback form, so a callback-only
+implementation passes the suite and then throws inside aedes on every
+clean-session close and CONNECT. `CallBackPersistence` already handles both.
+
+aedes feature-detects the method and skips it when a persistence does not have
+it, so an implementation that omits it still runs. It is then vulnerable: the
+QoS 2 dedup table survives a clean-session reconnect, and the first colliding
+`messageId` the reconnected client publishes is acknowledged without ever being
+delivered (GHSA-p8r9-qf8w-p73r). `CallBackPersistence` mirrors that detection -
+when the async persistence it wraps has no `cleanIncoming`, and no subclass has
+supplied one, it leaves its own `cleanIncoming` property `undefined` and emits a
+process warning.
 
 ### Tests
 

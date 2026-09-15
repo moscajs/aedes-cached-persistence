@@ -3,12 +3,22 @@
 /* This module provides a callback layer for async persistence implementations */
 const { Readable } = require('node:stream')
 const CachedPersistence = require('./index.js')
+const { PromisifiedPersistence } = require('./promisified.js')
 
 function toValue (obj, prop) {
   if (typeof obj === 'object' && obj !== null && prop in obj) {
     return obj[prop]
   }
   return obj
+}
+
+// PromisifiedPersistence always defines cleanIncoming and only throws at call
+// time, so look through the shim at the persistence it actually wraps.
+function implementsCleanIncoming (persistence) {
+  const target = persistence instanceof PromisifiedPersistence
+    ? persistence.instance
+    : persistence
+  return typeof target?.cleanIncoming === 'function'
 }
 
 class CallBackPersistence extends CachedPersistence {
@@ -18,9 +28,19 @@ class CallBackPersistence extends CachedPersistence {
 
     // aedes feature-detects cleanIncoming, so don't advertise a capability the
     // wrapped persistence lacks: a bare delegation would pass that check and
-    // then throw synchronously on every clean-session CONNECT.
-    if (typeof this.asyncPersistence.cleanIncoming !== 'function') {
+    // then fail on every clean-session CONNECT. Only withdraw our own
+    // delegation, so a subclass that brings its own implementation keeps it.
+    if (!implementsCleanIncoming(this.asyncPersistence) &&
+        this.cleanIncoming === CallBackPersistence.prototype.cleanIncoming) {
       this.cleanIncoming = undefined
+      // silently skipping the clean is the vulnerable state, so say so
+      process.emitWarning(
+        'the wrapped persistence does not implement cleanIncoming, so incoming ' +
+        'QoS 2 packets survive a clean-session reconnect and the first colliding ' +
+        'messageId is acknowledged without being delivered (GHSA-p8r9-qf8w-p73r). ' +
+        'Upgrade it to the aedes-persistence v11 interface.',
+        'AedesPersistenceWarning'
+      )
     }
   }
 
@@ -194,13 +214,24 @@ class CallBackPersistence extends CachedPersistence {
       .catch(cb)
   }
 
+  // the only method aedes calls promise-style (lib/client.js on close,
+  // lib/handlers/connect.js on a clean-session CONNECT), so it takes both
+  // forms; the promise form reuses the callback path to keep the ready queue.
   cleanIncoming (client, cb) {
+    if (!cb) {
+      return new Promise((resolve, reject) => {
+        this.cleanIncoming(client, err => {
+          if (err) { reject(err) } else { resolve() }
+        })
+      })
+    }
     if (!this.ready) {
       this.once('ready', this.cleanIncoming.bind(this, client, cb))
       return
     }
     this.asyncPersistence.cleanIncoming(client)
-      .then(() => cb(null, client))
+      // nextTick so a throw inside cb does not land in catch and call it twice
+      .then(() => process.nextTick(cb, null, client))
       .catch(cb)
   }
 

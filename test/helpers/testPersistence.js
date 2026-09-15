@@ -20,10 +20,20 @@ class TestPersistence extends CachedPersistence {
   }
 
   // the backend is a persistence in its own right: it queues every call until
-  // it gets a broker, so hand it ours before we announce we are ready
+  // it gets a broker and its own setup is async, so hand it our broker and wait
+  // for it before we announce that we are ready
   _setup () {
+    if (this.ready) {
+      return
+    }
     this.backend.broker = this.broker
-    super._setup()
+    if (this.backend.ready) {
+      super._setup()
+      return
+    }
+    this.backend.once('ready', () => super._setup())
+    // without this the backend's setup failure would hang us instead
+    this.backend.once('error', err => this.emit('error', err))
   }
 
   addSubscriptions (client, subs, cb) {
